@@ -7,7 +7,5 @@ export interface Product {
   description: string,
   discountPercentage: number,
   rating: number,
-  sku: string,
-  createdAt: string,
-  updatedAt: string
+  sku: string
 }

@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
-import productModel from "../../infrastructure/repositories/product.repository";
-import { Product } from "../../domain/entities/product";
+import productRepository from "../../../infrastructure/repositories/product.repository";
+import { Product } from "../../../domain/entities/product.entity";
 
 // get all products
 const getAllProducts = async (req: Request, res: Response) => {
   try {
-    const products = await productModel.getAllProducts()
+    const products = await productRepository.getAllProducts()
     res.status(200).json(products)
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch products" });
@@ -20,7 +20,7 @@ const getProductById = async (req: Request, res: Response) => {
     return
   }
   try {
-    const product = await productModel.getProductById(id)
+    const product = await productRepository.getProductById(id)
     if (!product) {
       res.status(404).json({ error : "Product not found"})
       return
@@ -35,7 +35,7 @@ const getProductById = async (req: Request, res: Response) => {
 const getProductByName = async (req: Request, res: Response) => {
   const productName = req.params.productName
   try {
-    const product = await productModel.getProductByName(productName)
+    const product = await productRepository.getProductByName(productName)
     if(!product) {
       res.status(404).json({ error : "Product not found"})
       return
@@ -50,7 +50,7 @@ const getProductByName = async (req: Request, res: Response) => {
 const getProductsByCategoryId = async (req: Request, res: Response) => {
   const categoryId = parseInt(req.params.categoryId)
   try {
-    const products = await productModel.getProductsByCategoryId(categoryId)
+    const products = await productRepository.getProductsByCategoryId(categoryId)
     if(!products) {
       res.status(404).json({ error: "Products not found" })
       return
@@ -70,7 +70,7 @@ const addProduct = async (req: Request, res: Response) => {
   }
 
   try {
-    const newProduct = await productModel.createProduct({
+    const newProduct = await productRepository.createProduct({
       productName,
       categoryId,
       price,
@@ -91,7 +91,7 @@ const editProduct = async (req: Request<{ productId: string }, {}, Partial<Produ
   const id = parseInt(req.params.productId)
   try {
     const { productName, categoryId, price, image, description, discountPercentage, rating, sku } = req.body
-    const product = await productModel.editProduct(id, {productName, categoryId, price, image, description, discountPercentage, rating, sku})
+    const product = await productRepository.editProduct(id, {productName, categoryId, price, image, description, discountPercentage, rating, sku})
 
     if (!product) {
       res.status(404).json({ message: "Product not found" })
@@ -108,7 +108,7 @@ const editProduct = async (req: Request<{ productId: string }, {}, Partial<Produ
 const deleteProduct = async (req: Request, res: Response) => {
   const id = parseInt(req.params.productId)
   try {
-    await productModel.deleteProduct(id)
+    await productRepository.deleteProduct(id)
     res.status(200).json({ message: "Product deleted"})
   } catch (err) {
     res.status(500).json({ error: "Failed to delete product" });

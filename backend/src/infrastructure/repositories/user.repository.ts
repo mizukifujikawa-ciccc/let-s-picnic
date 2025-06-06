@@ -1,13 +1,27 @@
 import { createClient } from '../database/dbClient'
-import { User } from "../types/user";
+import { User } from "../../domain/entities/user.entity";
+
+// 共通のマッピング関数
+function mapRowToUser(row: any): User {
+  return new User(
+    row.id,
+    row.firstname,
+    row.lastname,
+    row.email,
+    row.password, // hashedPassword
+    row.role,
+    row.created_at,
+    row.updated_at
+  );
+}
 
 // fetch all user
-const getAllUsers = async () => {
+const getAllUsers = async (): Promise<User[]> => {
   const client = createClient()
   try {
     await client.connect()
     const result = await client.query(`SELECT * FROM "user" ORDER BY created_at DESC`)
-    return result.rows
+    return result.rows.map(mapRowToUser)
   } catch (err) {
     console.error("Error fetching users:", err)
     throw err
@@ -17,12 +31,12 @@ const getAllUsers = async () => {
 }
 
 // fetch user by id
-const getUserById = async (id: number) => {
+const getUserById = async (id: number): Promise<User | null> => {
   const client = createClient()
   try {
     await client.connect()
     const result = await client.query( `SELECT * FROM "user" WHERE id = $1`, [id])
-    return result.rows[0] || null
+    return result.rows[0] ? mapRowToUser(result.rows[0]) : null
   } catch (err) {
     console.error("Error fetching user by id:", err)
     throw err
@@ -32,7 +46,7 @@ const getUserById = async (id: number) => {
 }
 
 // get user by email (for login)
-const getUserByEmail = async (email: string) => {
+const getUserByEmail = async (email: string): Promise<User | null> => {
   const client = createClient()
   try {
     await client.connect()
@@ -40,7 +54,7 @@ const getUserByEmail = async (email: string) => {
       `SELECT * FROM "user" WHERE email = $1`,
       [email]
     )
-    return result.rows[0] || null
+    return result.rows[0] ? mapRowToUser(result.rows[0]) : null
   } catch (err) {
     console.error("Error fetching user by email:", err)
     throw err
@@ -50,7 +64,7 @@ const getUserByEmail = async (email: string) => {
 }
 
 // add new user
-const createUser = async (newUser: Omit<User,  'id' | 'createdAt' | 'updatedAt'>) => {
+const createUser = async (newUser: Omit<User,  'id'>): Promise<User | null> => {
   const { firstName, lastName, email, hashedPassword, role } = newUser
   const client = createClient()
   try {
@@ -60,7 +74,7 @@ const createUser = async (newUser: Omit<User,  'id' | 'createdAt' | 'updatedAt'>
       [email]
     )
     if (existUser.rows[0]) {
-      return undefined;
+      return null;
     }
 
     const result = await client.query(
@@ -69,7 +83,7 @@ const createUser = async (newUser: Omit<User,  'id' | 'createdAt' | 'updatedAt'>
        RETURNING *`,
       [firstName, lastName, email, hashedPassword, role]
     )
-    return result.rows[0]
+    return result.rows[0] ? mapRowToUser(result.rows[0]) : null
   } catch (err) {
     console.error("Error creating user:", err)
     throw err
@@ -79,10 +93,10 @@ const createUser = async (newUser: Omit<User,  'id' | 'createdAt' | 'updatedAt'>
 }
 
 // edit user (except password)
-const editUser = async (id: number, updatedUser: Partial<User>) => {
+const editUser = async (id: number, updatedUser: Partial<User>): Promise<User | null> => {
   const findUser = await getUserById(id);
   if(!findUser) {
-    return undefined;
+    return null;
   }
 
   const client = createClient()
@@ -90,16 +104,17 @@ const editUser = async (id: number, updatedUser: Partial<User>) => {
     await client.connect()
 
     const updateData = {
-      firstName: updatedUser.firstName ?? findUser.firstname,
-      lastName: updatedUser.lastName ?? findUser.lastname,
+      firstName: updatedUser.firstName ?? findUser.firstName,
+      lastName: updatedUser.lastName ?? findUser.lastName,
       email: updatedUser.email ?? findUser.email,
       role: updatedUser.role ?? findUser.role
     }
+
     const result = await client.query(
       `UPDATE "user" SET firstname = $1, lastname = $2, email = $3, role = $4 WHERE id = $5 RETURNING *`,
       [updateData.firstName, updateData.lastName, updateData.email, updateData.role, id]
     )
-    return result.rows[0] || null
+    return result.rows[0] ? mapRowToUser(result.rows[0]) : null
   } catch (err) {
     console.error("Error editing user:", err)
     throw err
@@ -109,12 +124,12 @@ const editUser = async (id: number, updatedUser: Partial<User>) => {
 }
 
 // delete user
-const deleteUser = async (id: number) => {
+const deleteUser = async (id: number): Promise<User | null> => {
   const client = createClient()
   try {
     await client.connect()
     const result = await client.query(`DELETE FROM "user" WHERE id = $1 RETURNING *`, [id])
-    return result.rows[0] || null
+    return result.rows[0] ? mapRowToUser(result.rows[0]) : null
   } catch (err) {
     console.error("Error delete user:", err)
     throw err
@@ -122,7 +137,6 @@ const deleteUser = async (id: number) => {
     await client.end()
   }
 }
-
 
 export default {
   getAllUsers,

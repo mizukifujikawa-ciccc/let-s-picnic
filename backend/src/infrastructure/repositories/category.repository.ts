@@ -1,5 +1,5 @@
 import { createClient } from "../database/dbClient";
-import { Category } from "../../domain/entities/category";
+import { Category } from "../../domain/entities/category.entity";
 
 // Get all category
 const getAllCategory = async () => {

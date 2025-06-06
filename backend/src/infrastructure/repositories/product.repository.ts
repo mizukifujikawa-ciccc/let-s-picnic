@@ -1,5 +1,5 @@
 import { createClient } from "../database/dbClient";
-import { Product } from "../../domain/entities/product";
+import { Product } from "../../domain/entities/product.entity";
 
 // get all products
 const getAllProducts = async () => {
