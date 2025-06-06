@@ -10,7 +10,7 @@ describe('GET /product', () => {
       id: 1,
       product_name: 'Test Product A',
       category_id: 1,
-      price: 20,
+      price: '19.99',
       image: 'https://example.com/imageA.webp',
       description: 'Description for product A',
       category_name: 'Test Category A'
@@ -19,7 +19,7 @@ describe('GET /product', () => {
       id: 2,
       product_name: 'Test Product B',
       category_id: 2,
-      price: 30,
+      price: '29.99',
       image: 'https://example.com/imageB.webp',
       description: 'Description for product B',
       category_name: 'Test Category B'
@@ -68,6 +68,23 @@ describe('GET /product', () => {
       expect(product.description).toBe(expected.description);
       expect(product.category_name).toBe(expected.category_name);
     }
+  });
+
+  it('should return product with id 1', async () => {
+    const response = await request(app).get('/product/1');
+
+    expect(response.status).toBe(200);
+
+    const expected = resultList[0];
+    const product = response.body;
+
+    expect(product.id).toBe(expected.id);
+    expect(product.product_name).toBe(expected.product_name);
+    expect(product.category_id).toBe(expected.category_id);
+    expect(product.price).toBe(expected.price);
+    expect(product.image).toBe(expected.image);
+    expect(product.description).toBe(expected.description);
+    expect(product.category_name).toBe(expected.category_name);
   });
 
   // テスト終了後にデータを削除
