@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import productModel from "../models/product.model";
-import { Product } from "../types/product";
+import productModel from "../../infrastructure/repositories/product.repository";
+import { Product } from "../../domain/entities/product";
 
 // get all products
 const getAllProducts = async (req: Request, res: Response) => {
@@ -123,4 +123,4 @@ export default {
   addProduct,
   editProduct,
   deleteProduct
-}
+};

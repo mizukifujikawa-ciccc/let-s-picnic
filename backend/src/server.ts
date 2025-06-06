@@ -3,10 +3,10 @@ import dotenv from 'dotenv'
 import cookieSession from 'cookie-session'
 import cors from 'cors'
 dotenv.config()
-import { connectDb } from './database/dbClient'
-import userRouter from './routes/user.routes'
-import categoryRouter from './routes/category.routes'
-import productRouter from './routes/product.routes'
+import { connectDb } from './infrastructure/database/dbClient'
+import userRouter from './interfaces/http/routes/user.routes'
+import categoryRouter from './interfaces/http/routes/category.routes'
+import productRouter from './interfaces/http/routes/product.routes'
 
 // Create server
 const app = express()

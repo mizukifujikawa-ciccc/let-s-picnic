@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import categoryModel from "../models/category.model";
-import { Category } from "../types/category";
+import categoryModel from "../../infrastructure/repositories/category.repository";
+import { Category } from "../../domain/entities/category";
 
 // get all category
 const getAllCategory = async (req: Request, res: Response) => {

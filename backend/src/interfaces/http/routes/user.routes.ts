@@ -13,3 +13,4 @@ userRouter.put('/:userId', userController.editUser) // ok http://localhost:3000/
 userRouter.delete('/:userId', userController.deleteUser) // ok
 
 export default userRouter
+

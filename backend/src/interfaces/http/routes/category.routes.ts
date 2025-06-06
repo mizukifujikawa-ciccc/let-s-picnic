@@ -10,3 +10,4 @@ categoryRouter.delete('/:categoryId', categoryController.deleteCategoryById) // 
 categoryRouter.get('/:categoryId', categoryController.getCategoryById) // ok http://localhost:3000/category/1
 
 export default categoryRouter
+

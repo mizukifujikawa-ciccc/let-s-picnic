@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import userModel from "../models/user.model";
+import userModel from "../../infrastructure/repositories/user.repository";
 import bcrypt from "bcrypt";
-import { User } from "../types/user";
+import { User } from "../../domain/entities/user";
 
 // get all users
 const getAllUsers = async (req: Request, res: Response) => {
@@ -158,4 +158,4 @@ export default {
   loginUser,
   logoutUser,
   checkCookie
-}
+};
