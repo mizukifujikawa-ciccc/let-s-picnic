@@ -15,7 +15,6 @@ const mapRowToProduct = (row: any): Product => {
   return new Product(
     row.product_id ?? row.id,
     row.product_name,
-    row.category_id,
     category,
     row.price,
     row.product_image ?? row.image,
