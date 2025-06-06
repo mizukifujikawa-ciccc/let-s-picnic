@@ -63,8 +63,8 @@ const getProductsByCategoryId = async (req: Request, res: Response) => {
 
 // add product
 const addProduct = async (req: Request, res: Response) => {
-  const { productName, categoryId, price, image, description } = req.body
-  if (!productName || !categoryId || !price || !image || !description) {
+  const { productName, categoryId, price, image, description, discountPercentage, rating, sku } = req.body
+  if (!productName || !categoryId || !price || !image || !description || !rating || !sku) {
     res.status(400).json({ error: "Missing required fields" });
     return
   }
@@ -75,7 +75,10 @@ const addProduct = async (req: Request, res: Response) => {
       categoryId,
       price,
       image,
-      description
+      description,
+      discountPercentage,
+      rating,
+      sku
     })
     res.status(201).json(newProduct)
   } catch (err) {
@@ -87,8 +90,8 @@ const addProduct = async (req: Request, res: Response) => {
 const editProduct = async (req: Request<{ productId: string }, {}, Partial<Product>>, res: Response) => {
   const id = parseInt(req.params.productId)
   try {
-    const { productName, categoryId, price, image, description } = req.body
-    const product = await productModel.editProduct(id, {productName, categoryId, price, image, description})
+    const { productName, categoryId, price, image, description, discountPercentage, rating, sku } = req.body
+    const product = await productModel.editProduct(id, {productName, categoryId, price, image, description, discountPercentage, rating, sku})
 
     if (!product) {
       res.status(404).json({ message: "Product not found" })

@@ -7,13 +7,41 @@ const getAllProducts = async () => {
   try {
     await client.connect()
     const result = await client.query(
-      `SELECT product.*, category.category_name
+      `SELECT
+        product.id as product_id,
+        product.image as product_image,
+        product.description as product_description,
+        product.*,
+        category.category_name as category_name,
+        category.description as category_description,
+        category.image as category_image
        FROM "product" AS product
        LEFT JOIN "category" AS category
        ON product.category_id = category.id
-       ORDER BY product_name ASC`
+       ORDER BY product_id ASC`
     )
-    return result.rows
+    const products = result.rows.map((row) => {
+      return {
+        product: {
+          id: row.product_id,
+          productName: row.product_name,
+          price: row.price,
+          image: row.product_image,
+          description: row.product_description,
+          discountPercentage: row.discount_percentage,
+          rating: row.rating,
+          sku: row.sku,
+          categoryId: row.category_id,
+          category: {
+            categoryName: row.category_name,
+            categoryDescription: row.category_description,
+            categoryImage: row.category_image,
+          },
+        },
+      };
+    });
+
+    return products;
   } catch (err) {
     console.error(err)
     throw err
@@ -28,12 +56,41 @@ const getProductById = async (id: number) => {
   try {
     await client.connect()
     const result = await client.query(
-      `SELECT product.*, category.category_name
+      `SELECT
+        product.id as product_id,
+        product.image as product_image,
+        product.description as product_description,
+        product.*,
+        category.category_name as category_name,
+        category.description as category_description,
+        category.image as category_image
        FROM "product" AS product
        LEFT JOIN "category" AS category
        ON product.category_id = category.id
-       WHERE product.id = $1`, [id])
-    return result.rows[0]
+       WHERE product.id = $1`, [id]
+    )
+    const products = result.rows.map((row) => {
+      return {
+        product: {
+          id: row.product_id,
+          productName: row.product_name,
+          price: row.price,
+          image: row.product_image,
+          description: row.product_description,
+          discountPercentage: row.discount_percentage,
+          rating: row.rating,
+          sku: row.sku,
+          categoryId: row.category_id,
+          category: {
+            categoryName: row.category_name,
+            categoryDescription: row.category_description,
+            categoryImage: row.category_image,
+          },
+        },
+      };
+    });
+
+    return products[0];
   } catch (err) {
     console.error(err)
     throw err
@@ -48,12 +105,41 @@ const getProductByName = async (productName: string) => {
   try {
     await client.connect()
     const result = await client.query(
-      `SELECT product.*, category.category_name
+      `SELECT
+        product.id as product_id,
+        product.image as product_image,
+        product.description as product_description,
+        product.*,
+        category.category_name as category_name,
+        category.description as category_description,
+        category.image as category_image
        FROM "product" AS product
        LEFT JOIN "category" AS category
        ON product.category_id = category.id
-       WHERE product.product_name = $1`, [productName])
-    return result.rows[0]
+       WHERE product.product_name = $1`, [productName]
+    )
+    const products = result.rows.map((row) => {
+      return {
+        product: {
+          id: row.product_id,
+          productName: row.product_name,
+          price: row.price,
+          image: row.product_image,
+          description: row.product_description,
+          discountPercentage: row.discount_percentage,
+          rating: row.rating,
+          sku: row.sku,
+          categoryId: row.category_id,
+          category: {
+            categoryName: row.category_name,
+            categoryDescription: row.category_description,
+            categoryImage: row.category_image,
+          },
+        },
+      };
+    });
+
+    return products;
   } catch (err) {
     console.error(err)
     throw err
@@ -68,12 +154,41 @@ const getProductsByCategoryId = async (categoryId: number) => {
   try {
     await client.connect()
     const result = await client.query(
-      `SELECT product.*, category.category_name
+      `SELECT
+        product.id as product_id,
+        product.image as product_image,
+        product.description as product_description,
+        product.*,
+        category.category_name as category_name,
+        category.description as category_description,
+        category.image as category_image
        FROM "product" AS product
        LEFT JOIN "category" AS category
        ON product.category_id = category.id
-       WHERE product.category_id = $1`,[categoryId])
-    return result.rows
+       WHERE product.category_id = $1`,[categoryId]
+    )
+    const products = result.rows.map((row) => {
+      return {
+        product: {
+          id: row.product_id,
+          productName: row.product_name,
+          price: row.price,
+          image: row.product_image,
+          description: row.product_description,
+          discountPercentage: row.discount_percentage,
+          rating: row.rating,
+          sku: row.sku,
+          categoryId: row.category_id,
+          category: {
+            categoryName: row.category_name,
+            categoryDescription: row.category_description,
+            categoryImage: row.category_image,
+          },
+        },
+      };
+    });
+
+    return products;
   } catch (err) {
     console.error(err)
     throw err
@@ -82,13 +197,15 @@ const getProductsByCategoryId = async (categoryId: number) => {
   }
 }
 
-// create product 
+// create product
 const createProduct = async (newProduct: Omit<Product, 'id'| 'createdAt' | 'updatedAt'>) => {
-  const { productName, categoryId, price, image, description } = newProduct
+  const { productName, categoryId, price, image, description, discountPercentage, rating, sku } = newProduct
   const client = createClient()
   try {
     await client.connect()
-    const result = await client.query(`INSERT INTO product (product_name, category_id, price, image, description) VALUES ($1, $2, $3, $4, $5) RETURNING *`,  [productName, categoryId, price, image, description])
+    const result = await client.query(
+      `INSERT INTO product (product_name, category_id, price, image, description, discount_percentage, rating, sku) VALUES ($1, $2, $3, $4, $5,  $6, $7, $8) RETURNING *`,
+      [productName, categoryId, price, image, description, discountPercentage, rating, sku])
     return result.rows[0]
   } catch (err) {
     console.error(err)
@@ -106,15 +223,18 @@ const editProduct = async (id: number, updatedProduct: Partial<Product>) => {
   try {
     await client.connect()
     const updateData = {
-      productName: updatedProduct.productName ?? foundProduct.product_name,
-      categoryId: updatedProduct.categoryId ?? foundProduct.category_id,
-      price: updatedProduct.price ?? foundProduct.price,
-      image: updatedProduct.image ?? foundProduct.image,
-      description: updatedProduct.description ?? foundProduct.description
+      productName: updatedProduct.productName ?? foundProduct.product.productName,
+      categoryId: updatedProduct.categoryId ?? foundProduct.product.categoryId,
+      price: updatedProduct.price ?? foundProduct.product.price,
+      image: updatedProduct.image ?? foundProduct.product.image,
+      description: updatedProduct.description ?? foundProduct.product.description,
+      discountPercentage: updatedProduct.discountPercentage ?? foundProduct.product.discountPercentage,
+      rating: updatedProduct.rating ?? foundProduct.product.rating,
+      sku: updatedProduct.sku ?? foundProduct.product.sku
     }
     const result = await client.query(
-      `UPDATE "product" SET product_name = $1, category_id = $2, price = $3, image = $4, description = $5 WHERE id = $6 RETURNING *`,
-      [updateData.productName, updateData.categoryId, updateData.price, updateData.image, updateData.description, id])
+      `UPDATE "product" SET product_name = $1, category_id = $2, price = $3, image = $4, description = $5, discount_percentage = $6, rating = $7, sku = $8 WHERE id = $9 RETURNING *`,
+      [updateData.productName, updateData.categoryId, updateData.price, updateData.image, updateData.description, updateData.discountPercentage, updateData.rating, updateData.sku, id])
     return result.rows[0]
   } catch (err) {
     console.error(err)

@@ -5,6 +5,7 @@ const categoryRouter = Router()
 
 categoryRouter.get('/', categoryController.getAllCategory) // ok http://localhost:3000/
 categoryRouter.post('/', categoryController.addCategory) // ok
+categoryRouter.put('/:categoryId', categoryController.editCategory) // ok
 categoryRouter.delete('/:categoryId', categoryController.deleteCategoryById) // ok
 categoryRouter.get('/:categoryId', categoryController.getCategoryById) // ok http://localhost:3000/category/1
 

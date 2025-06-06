@@ -2,12 +2,7 @@ import express, { Request, Response } from 'express'
 import dotenv from 'dotenv'
 import cookieSession from 'cookie-session'
 import cors from 'cors'
-// dotenv.config()
-if (process.env.NODE_ENV === 'test') {
-  dotenv.config({ path: './.env.test' }); // テスト用の設定ファイルを読み込む
-} else {
-  dotenv.config();  // 開発用の設定ファイルを読み込む
-}
+dotenv.config()
 import { connectDb } from './database/dbClient'
 import userRouter from './routes/user.routes'
 import categoryRouter from './routes/category.routes'
@@ -18,7 +13,7 @@ const app = express()
 
 // Middleware
 app.use(cors({
-  origin: "http://localhost:4321", // React port
+  origin: "http://localhost:5173", // React port
   credentials: true // allow cookie transfer
 }))
 app.use(express.json());
@@ -37,8 +32,7 @@ app.use(cookieSession({
 // Routes
 app.use('/user', userRouter);
 app.use('/category', categoryRouter);
-app.use('/product', productRouter);
-app.use('/purchase', productRouter);
+app.use('/product', productRouter)
 
 // Fallback
 app.use((req: Request, res: Response) => {
@@ -57,5 +51,3 @@ connectDb().then(() => {
 }).catch(err => {
   console.error(err)
 })
-
-export default app;

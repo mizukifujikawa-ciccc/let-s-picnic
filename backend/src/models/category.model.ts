@@ -48,11 +48,11 @@ const getCategoryByName = async (categoryName: string) => {
 
 // Create category
 const createCategory = async (newCategory: Omit<Category, 'id' | 'createdAt' | 'updatedAt'>) => {
-  const { categoryName } = newCategory
+  const { categoryName, description, image } = newCategory
   const client = createClient()
   try {
     await client.connect() // Open the connection
-    const result = await client.query(`INSERT INTO category (category_name) VALUES ($1) RETURNING *`, [categoryName])
+    const result = await client.query(`INSERT INTO category (category_name, description, image) VALUES ($1, $2, $3) RETURNING *`, [categoryName, description, image])
     return result.rows[0]
   } catch (err) {
     console.error(err)
@@ -72,9 +72,11 @@ const editCategoryById = async (id: number, updateData: Partial<Category>) => {
   try {
     await client.connect() // Open the connection
     const newUpdate = {
-      categoryName: updateData.categoryName ?? foundCategory.category_name
+      name: updateData.categoryName ?? foundCategory.category_name,
+      description: updateData.description ?? foundCategory.description,
+      image: updateData.image ?? foundCategory.image
     }
-    const result = await client.query(`UPDATE category SET category_name = $1 WHERE id = $2 RETURNING *`, [newUpdate.categoryName, id])
+    const result = await client.query(`UPDATE category SET category_name = $1, description = $2, image = $3 WHERE id = $4 RETURNING *`, [newUpdate.name, newUpdate.description, newUpdate.image, id])
     return result.rows[0]
   } catch (err) {
     console.error(err)
