@@ -1,7 +1,12 @@
 import { Router } from "express";
-import userController from "../controllers/user.controller";
+import { UserService } from "../../../application/service/user.service";
+import userRepository from "../../../infrastructure/repositories/user.repository";
+import { createUserController } from "../controllers/user.controller";
 
 const userRouter = Router()
+
+const userService = new UserService(userRepository);
+const userController = createUserController(userService);
 
 userRouter.get('/', userController.getAllUsers) // ok http://localhost:3000/user/
 userRouter.post('/signup', userController.addUser) // ok
@@ -13,3 +18,4 @@ userRouter.put('/:userId', userController.editUser) // ok http://localhost:3000/
 userRouter.delete('/:userId', userController.deleteUser) // ok
 
 export default userRouter
+

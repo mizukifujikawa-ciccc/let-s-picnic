@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
-import categoryModel from "../models/category.model";
-import { Category } from "../types/category";
+import categoryRepository from "../../../infrastructure/repositories/category.repository";
+import { Category } from "../../../domain/entities/category.entity";
 
 // get all category
 const getAllCategory = async (req: Request, res: Response) => {
   try {
-    const category = await categoryModel.getAllCategory();
+    const category = await categoryRepository.getAllCategory();
     res.status(200).json(category);
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch category" });
@@ -16,7 +16,7 @@ const getAllCategory = async (req: Request, res: Response) => {
 const getCategoryById = async (req: Request, res: Response) => {
   const id = Number(req.params.categoryId);
   try {
-    const category = await categoryModel.getCategoryById(id)
+    const category = await categoryRepository.getCategoryById(id)
     if (!category) {
       res.status(404).json({ error : "Category not found"})
       return
@@ -26,21 +26,6 @@ const getCategoryById = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Something went wrong" });
   }
 }
-
-//get category by name
-// const getCategoryByName = async (req: Request, res: Response) => {
-//   const categoryName = req.params.categoryName;
-//   try {
-//     const category = await categoryModel.getCategoryByName(categoryName)
-//     if (!category) {
-//       res.status(404).json({ error : "Category not found"})
-//       return
-//     }
-//     res.status(200).json(category);
-//   } catch (err) {
-//     res.status(500).json({ error: "Something went wrong" });
-//   }
-// }
 
 // add category
 const addCategory = async (req: Request, res: Response) => {
@@ -52,13 +37,13 @@ const addCategory = async (req: Request, res: Response) => {
   }
 
   try {
-    const existingCategory = await categoryModel.getCategoryByName(categoryName);
+    const existingCategory = await categoryRepository.getCategoryByName(categoryName);
     if (existingCategory) {
       res.status(409).json({ error: "Category is already registered" });
       return
     }
 
-    const newCategory = await categoryModel.createCategory({ categoryName, description, image });
+    const newCategory = await categoryRepository.createCategory({ categoryName, description, image });
     res.status(201).json(newCategory);
   } catch (err) {
     res.status(500).json({ error: "Failed to create category" });
@@ -75,13 +60,13 @@ const editCategory = async (req: Request<{ categoryId: string }, {}, Partial<Cat
   }
 
   try {
-    const existingCategory = await categoryModel.getCategoryById(id);
+    const existingCategory = await categoryRepository.getCategoryById(id);
     if (!existingCategory) {
       res.status(400).json({ error: "Category is not found" });
       return
     }
 
-    const newCategory = await categoryModel.editCategoryById(id, { categoryName });
+    const newCategory = await categoryRepository.editCategoryById(id, { categoryName });
     res.status(201).json(newCategory);
   } catch (err) {
     res.status(500).json({ error: "Failed to edit category" });
@@ -92,7 +77,7 @@ const editCategory = async (req: Request<{ categoryId: string }, {}, Partial<Cat
 const deleteCategoryById = async (req: Request<{ categoryId: string }>, res: Response) => {
   const id = Number(req.params.categoryId)
   try {
-    await categoryModel.removeCategoryById(id)
+    await categoryRepository.removeCategoryById(id)
     res.status(200).json({ message: "Category deleted" })
   } catch (err) {
     console.error(err)

@@ -12,3 +12,4 @@ productRouter.get('/search/:productName', productController.getProductByName) //
 productRouter.get('/:productId', productController.getProductById) // ok http://localhost:3000/product/1
 
 export default productRouter
+
