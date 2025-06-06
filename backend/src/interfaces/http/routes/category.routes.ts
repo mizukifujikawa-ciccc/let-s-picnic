@@ -1,9 +1,13 @@
 import { Router } from "express";
-import categoryController from "../controllers/category.controller";
+import { CategoryService } from "../../../application/service/category.service";
+import categoryRepository from "../../../infrastructure/repositories/category.repository";
+import { createCategoryController } from "../controllers/category.controller";
 
 const categoryRouter = Router()
 
-categoryRouter.get('/', categoryController.getAllCategory) // ok http://localhost:3000/
+const categoryService = new CategoryService(categoryRepository);
+const categoryController = createCategoryController(categoryService);
+categoryRouter.get('/', categoryController.getAllCategories) // ok http://localhost:3000/
 categoryRouter.post('/', categoryController.addCategory) // ok
 categoryRouter.put('/:categoryId', categoryController.editCategory) // ok
 categoryRouter.delete('/:categoryId', categoryController.deleteCategoryById) // ok

@@ -1,7 +1,12 @@
 import { Router } from "express";
-import productController from "../controllers/product.controller";
+import { ProductService } from "../../../application/service/product.service";
+import productRepository from "../../../infrastructure/repositories/product.repository";
+import { createProductController } from "../controllers/product.controller";
 
 const productRouter = Router()
+
+const productService = new ProductService(productRepository);
+const productController = createProductController(productService);
 
 productRouter.get('/', productController.getAllProducts) // ok
 productRouter.post('/', productController.addProduct) // ok

@@ -1,11 +1,37 @@
 import { createClient } from "../database/dbClient";
 import { Product } from "../../domain/entities/product.entity";
+import { Category } from "../../domain/entities/category.entity";
+import { ProductCreateInput } from "../../domain/repositories/product.repository";
+
+const mapRowToProduct = (row: any): Product => {
+  const category = new Category(
+    row.category_id,
+    row.category_name,
+    row.category_description,
+    row.category_image,
+    row.category_created_at,
+    row.category_updated_at,
+  );
+  return new Product(
+    row.product_id ?? row.id,
+    row.product_name,
+    category,
+    row.price,
+    row.product_image ?? row.image,
+    row.product_description ?? row.description,
+    row.discount_percentage,
+    row.rating,
+    row.sku,
+    row.created_at,
+    row.updated_at,
+  );
+};
 
 // get all products
-const getAllProducts = async () => {
-  const client = createClient()
+const getAllProducts = async (): Promise<Product[]> => {
+  const client = createClient();
   try {
-    await client.connect()
+    await client.connect();
     const result = await client.query(
       `SELECT
         product.id as product_id,
@@ -14,47 +40,28 @@ const getAllProducts = async () => {
         product.*,
         category.category_name as category_name,
         category.description as category_description,
-        category.image as category_image
+        category.image as category_image,
+        category.created_at as category_created_at,
+        category.updated_at as category_updated_at
        FROM "product" AS product
        LEFT JOIN "category" AS category
        ON product.category_id = category.id
-       ORDER BY product_id ASC`
-    )
-    const products = result.rows.map((row) => {
-      return {
-        product: {
-          id: row.product_id,
-          productName: row.product_name,
-          price: row.price,
-          image: row.product_image,
-          description: row.product_description,
-          discountPercentage: row.discount_percentage,
-          rating: row.rating,
-          sku: row.sku,
-          categoryId: row.category_id,
-          category: {
-            categoryName: row.category_name,
-            categoryDescription: row.category_description,
-            categoryImage: row.category_image,
-          },
-        },
-      };
-    });
-
-    return products;
+       ORDER BY product_id ASC`,
+    );
+    return result.rows.map(mapRowToProduct);
   } catch (err) {
-    console.error(err)
-    throw err
+    console.error(err);
+    throw err;
   } finally {
-    await client.end()
+    await client.end();
   }
-}
+};
 
 // get product by id
-const getProductById = async (id: number) => {
-  const client = createClient()
+const getProductById = async (id: number): Promise<Product | null> => {
+  const client = createClient();
   try {
-    await client.connect()
+    await client.connect();
     const result = await client.query(
       `SELECT
         product.id as product_id,
@@ -63,47 +70,31 @@ const getProductById = async (id: number) => {
         product.*,
         category.category_name as category_name,
         category.description as category_description,
-        category.image as category_image
+        category.image as category_image,
+        category.created_at as category_created_at,
+        category.updated_at as category_updated_at
        FROM "product" AS product
        LEFT JOIN "category" AS category
        ON product.category_id = category.id
-       WHERE product.id = $1`, [id]
-    )
-    const products = result.rows.map((row) => {
-      return {
-        product: {
-          id: row.product_id,
-          productName: row.product_name,
-          price: row.price,
-          image: row.product_image,
-          description: row.product_description,
-          discountPercentage: row.discount_percentage,
-          rating: row.rating,
-          sku: row.sku,
-          categoryId: row.category_id,
-          category: {
-            categoryName: row.category_name,
-            categoryDescription: row.category_description,
-            categoryImage: row.category_image,
-          },
-        },
-      };
-    });
-
-    return products[0];
+       WHERE product.id = $1`,
+      [id],
+    );
+    return result.rows[0] ? mapRowToProduct(result.rows[0]) : null;
   } catch (err) {
-    console.error(err)
-    throw err
+    console.error(err);
+    throw err;
   } finally {
-    await client.end()
+    await client.end();
   }
-}
+};
 
 // get product by name
-const getProductByName = async (productName: string) => {
-  const client = createClient()
+const getProductByName = async (
+  productName: string,
+): Promise<Product | null> => {
+  const client = createClient();
   try {
-    await client.connect()
+    await client.connect();
     const result = await client.query(
       `SELECT
         product.id as product_id,
@@ -112,47 +103,31 @@ const getProductByName = async (productName: string) => {
         product.*,
         category.category_name as category_name,
         category.description as category_description,
-        category.image as category_image
+        category.image as category_image,
+        category.created_at as category_created_at,
+        category.updated_at as category_updated_at
        FROM "product" AS product
        LEFT JOIN "category" AS category
        ON product.category_id = category.id
-       WHERE product.product_name = $1`, [productName]
-    )
-    const products = result.rows.map((row) => {
-      return {
-        product: {
-          id: row.product_id,
-          productName: row.product_name,
-          price: row.price,
-          image: row.product_image,
-          description: row.product_description,
-          discountPercentage: row.discount_percentage,
-          rating: row.rating,
-          sku: row.sku,
-          categoryId: row.category_id,
-          category: {
-            categoryName: row.category_name,
-            categoryDescription: row.category_description,
-            categoryImage: row.category_image,
-          },
-        },
-      };
-    });
-
-    return products;
+       WHERE product.product_name = $1`,
+      [productName],
+    );
+    return result.rows[0] ? mapRowToProduct(result.rows[0]) : null;
   } catch (err) {
-    console.error(err)
-    throw err
+    console.error(err);
+    throw err;
   } finally {
-    await client.end()
+    await client.end();
   }
-}
+};
 
 // get products by group category
-const getProductsByCategoryId = async (categoryId: number) => {
-  const client = createClient()
+const getProductsByCategoryId = async (
+  categoryId: number,
+): Promise<Product[]> => {
+  const client = createClient();
   try {
-    await client.connect()
+    await client.connect();
     const result = await client.query(
       `SELECT
         product.id as product_id,
@@ -161,105 +136,149 @@ const getProductsByCategoryId = async (categoryId: number) => {
         product.*,
         category.category_name as category_name,
         category.description as category_description,
-        category.image as category_image
+        category.image as category_image,
+        category.created_at as category_created_at,
+        category.updated_at as category_updated_at
        FROM "product" AS product
        LEFT JOIN "category" AS category
        ON product.category_id = category.id
-       WHERE product.category_id = $1`,[categoryId]
-    )
-    const products = result.rows.map((row) => {
-      return {
-        product: {
-          id: row.product_id,
-          productName: row.product_name,
-          price: row.price,
-          image: row.product_image,
-          description: row.product_description,
-          discountPercentage: row.discount_percentage,
-          rating: row.rating,
-          sku: row.sku,
-          categoryId: row.category_id,
-          category: {
-            categoryName: row.category_name,
-            categoryDescription: row.category_description,
-            categoryImage: row.category_image,
-          },
-        },
-      };
-    });
-
-    return products;
+       WHERE product.category_id = $1`,
+      [categoryId],
+    );
+    return result.rows.map(mapRowToProduct);
   } catch (err) {
-    console.error(err)
-    throw err
+    console.error(err);
+    throw err;
   } finally {
-    await client.end()
+    await client.end();
   }
-}
+};
 
 // create product
-const createProduct = async (newProduct: Omit<Product, 'id'| 'createdAt' | 'updatedAt'>) => {
-  const { productName, categoryId, price, image, description, discountPercentage, rating, sku } = newProduct
-  const client = createClient()
+const createProduct = async (
+  newProduct: ProductCreateInput,
+): Promise<Product | null> => {
+  const {
+    productName,
+    categoryId,
+    price,
+    image,
+    description,
+    discountPercentage,
+    rating,
+    sku,
+  } = newProduct;
+  const client = createClient();
   try {
-    await client.connect()
+    await client.connect();
     const result = await client.query(
       `INSERT INTO product (product_name, category_id, price, image, description, discount_percentage, rating, sku) VALUES ($1, $2, $3, $4, $5,  $6, $7, $8) RETURNING *`,
-      [productName, categoryId, price, image, description, discountPercentage, rating, sku])
-    return result.rows[0]
+      [
+        productName,
+        categoryId,
+        price,
+        image,
+        description,
+        discountPercentage,
+        rating,
+        sku,
+      ],
+    );
+    const inserted = result.rows[0];
+    if (!inserted) return null;
+    const joined = await client.query(
+      `SELECT category_name, description as category_description, image as category_image, created_at as category_created_at, updated_at as category_updated_at FROM category WHERE id = $1`,
+      [inserted.category_id],
+    );
+    const cat = joined.rows[0];
+    return cat
+      ? mapRowToProduct({
+          ...inserted,
+          ...cat,
+          category_id: inserted.category_id,
+        })
+      : null;
   } catch (err) {
-    console.error(err)
-    throw err
+    console.error(err);
+    throw err;
   } finally {
-    await client.end()
+    await client.end();
   }
-}
+};
 
 // edit product by id
-const editProduct = async (id: number, updatedProduct: Partial<Product>) => {
-  const foundProduct = await getProductById(id)
-  if (!foundProduct) return undefined
-  const client = createClient()
+const editProduct = async (
+  id: number,
+  updatedProduct: Partial<ProductCreateInput>,
+): Promise<Product | null> => {
+  const foundProduct = await getProductById(id);
+  if (!foundProduct) return null;
+  const client = createClient();
   try {
-    await client.connect()
+    await client.connect();
     const updateData = {
-      productName: updatedProduct.productName ?? foundProduct.product.productName,
-      categoryId: updatedProduct.categoryId ?? foundProduct.product.categoryId,
-      price: updatedProduct.price ?? foundProduct.product.price,
-      image: updatedProduct.image ?? foundProduct.product.image,
-      description: updatedProduct.description ?? foundProduct.product.description,
-      discountPercentage: updatedProduct.discountPercentage ?? foundProduct.product.discountPercentage,
-      rating: updatedProduct.rating ?? foundProduct.product.rating,
-      sku: updatedProduct.sku ?? foundProduct.product.sku
-    }
+      productName: updatedProduct.productName ?? foundProduct.productName,
+      categoryId: updatedProduct.categoryId ?? foundProduct.categoryId,
+      price: updatedProduct.price ?? foundProduct.price,
+      image: updatedProduct.image ?? foundProduct.image,
+      description: updatedProduct.description ?? foundProduct.description,
+      discountPercentage:
+        updatedProduct.discountPercentage ?? foundProduct.discountPercentage,
+      rating: updatedProduct.rating ?? foundProduct.rating,
+      sku: updatedProduct.sku ?? foundProduct.sku,
+    };
     const result = await client.query(
       `UPDATE "product" SET product_name = $1, category_id = $2, price = $3, image = $4, description = $5, discount_percentage = $6, rating = $7, sku = $8 WHERE id = $9 RETURNING *`,
-      [updateData.productName, updateData.categoryId, updateData.price, updateData.image, updateData.description, updateData.discountPercentage, updateData.rating, updateData.sku, id])
-    return result.rows[0]
+      [
+        updateData.productName,
+        updateData.categoryId,
+        updateData.price,
+        updateData.image,
+        updateData.description,
+        updateData.discountPercentage,
+        updateData.rating,
+        updateData.sku,
+        id,
+      ],
+    );
+    const updated = result.rows[0];
+    if (!updated) return null;
+    const joined = await client.query(
+      `SELECT category_name, description as category_description, image as category_image, created_at as category_created_at, updated_at as category_updated_at FROM category WHERE id = $1`,
+      [updated.category_id],
+    );
+    const cat = joined.rows[0];
+    return cat
+      ? mapRowToProduct({
+          ...updated,
+          ...cat,
+          category_id: updated.category_id,
+        })
+      : null;
   } catch (err) {
-    console.error(err)
-    throw err
+    console.error(err);
+    throw err;
   } finally {
-    await client.end()
+    await client.end();
   }
-}
+};
 
 // delete product by id
-const deleteProduct = async (id: number) => {
-  const foundProduct = await getProductById(id)
-  if (!foundProduct) return undefined
-  const client = createClient()
+const deleteProduct = async (id: number): Promise<Product | null> => {
+  const existing = await getProductById(id);
+  if (!existing) return null;
+  const client = createClient();
   try {
-    await client.connect()
-    await client.query(`DELETE FROM "product" WHERE id = $1`, [id])
-    return true
+    await client.connect();
+    await client.query(`DELETE FROM "product" WHERE id = $1`, [id]);
+    return existing;
   } catch (err) {
-    console.error(err)
-    throw err
+    console.error(err);
+    throw err;
   } finally {
-    await client.end()
+    await client.end();
   }
-}
+};
 
 export default {
   getAllProducts,
@@ -268,5 +287,5 @@ export default {
   getProductsByCategoryId,
   createProduct,
   editProduct,
-  deleteProduct
-}
+  deleteProduct,
+};
