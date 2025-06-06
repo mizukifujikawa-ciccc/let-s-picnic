@@ -1,126 +1,116 @@
 import { Request, Response } from "express";
-import productRepository from "../../../infrastructure/repositories/product.repository";
+import { ProductService } from "../../../application/service/product.service";
 import { Product } from "../../../domain/entities/product.entity";
 
-// get all products
-const getAllProducts = async (req: Request, res: Response) => {
-  try {
-    const products = await productRepository.getAllProducts()
-    res.status(200).json(products)
-  } catch (err) {
-    res.status(500).json({ error: "Failed to fetch products" });
-  }
+export function createProductController(productService: ProductService) {
+  return {
+    getAllProducts: async (_req: Request, res: Response) => {
+      try {
+        const products = await productService.getAllProducts();
+        res.status(200).json(products);
+      } catch (err) {
+        res.status(500).json({ error: "Failed to fetch products" });
+      }
+    },
+
+    getProductById: async (req: Request, res: Response) => {
+      const id = parseInt(req.params.productId);
+      if (isNaN(id)) {
+        res.status(400).json({ error: "Invalid product ID. Must be a number." });
+        return;
+      }
+      try {
+        const product = await productService.getProductById(id);
+        if (!product) {
+          res.status(404).json({ error: "Product not found" });
+          return;
+        }
+        res.status(200).json(product);
+      } catch (err) {
+        res.status(500).json({ error: "Failed to fetch product by id" });
+      }
+    },
+
+    getProductByName: async (req: Request, res: Response) => {
+      const productName = req.params.productName;
+      try {
+        const product = await productService.getProductByName(productName);
+        if (!product) {
+          res.status(404).json({ error: "Product not found" });
+          return;
+        }
+        res.status(200).json(product);
+      } catch (err) {
+        res.status(500).json({ error: "Failed to fetch product by name" });
+      }
+    },
+
+    getProductsByCategoryId: async (req: Request, res: Response) => {
+      const categoryId = parseInt(req.params.categoryId);
+      try {
+        const products = await productService.getProductsByCategoryId(categoryId);
+        if (!products) {
+          res.status(404).json({ error: "Products not found" });
+          return;
+        }
+        res.status(200).json(products);
+      } catch (err) {
+        res.status(500).json({ error: "Failed to fetch products by category id" });
+      }
+    },
+
+    addProduct: async (req: Request, res: Response) => {
+      const { productName, categoryId, price, image, description, discountPercentage, rating, sku } = req.body;
+      if (!productName || !categoryId || !price || !image || !description || !rating || !sku) {
+        res.status(400).json({ error: "Missing required fields" });
+        return;
+      }
+      try {
+        const product = await productService.addProduct({
+          productName,
+          categoryId,
+          price,
+          image,
+          description,
+          discountPercentage,
+          rating,
+          sku,
+        } as Omit<Product, 'id' | 'createdAt' | 'updatedAt' | 'category'>);
+        res.status(201).json(product);
+      } catch (err) {
+        res.status(500).json({ error: "Failed to create product" });
+      }
+    },
+
+    editProduct: async (
+      req: Request<{ productId: string }, {}, Partial<Omit<Product, 'category'>>>,
+      res: Response
+    ) => {
+      const id = parseInt(req.params.productId);
+      try {
+        const product = await productService.editProduct(id, req.body);
+        if (!product) {
+          res.status(404).json({ message: "Product not found" });
+          return;
+        }
+        res.status(200).json(product);
+      } catch (err) {
+        res.status(500).json({ error: "Failed to edit product" });
+      }
+    },
+
+    deleteProduct: async (req: Request, res: Response) => {
+      const id = parseInt(req.params.productId);
+      try {
+        const deleted = await productService.deleteProduct(id);
+        if (!deleted) {
+          res.status(404).json({ message: "Product not found" });
+          return;
+        }
+        res.status(200).json({ message: "Product deleted" });
+      } catch (err) {
+        res.status(500).json({ error: "Failed to delete product" });
+      }
+    },
+  };
 }
-
-// get product by id
-const getProductById = async (req: Request, res: Response) => {
-  const id = parseInt(req.params.productId)
-  if (isNaN(id)) {
-    res.status(400).json({ error: "Invalid user ID. Must be a number." })
-    return
-  }
-  try {
-    const product = await productRepository.getProductById(id)
-    if (!product) {
-      res.status(404).json({ error : "Product not found"})
-      return
-    }
-    res.status(200).json(product)
-  } catch (err) {
-    res.status(500).json({ error: "Failed to fetch product by id" });
-  }
-}
-
-// get product by name
-const getProductByName = async (req: Request, res: Response) => {
-  const productName = req.params.productName
-  try {
-    const product = await productRepository.getProductByName(productName)
-    if(!product) {
-      res.status(404).json({ error : "Product not found"})
-      return
-    }
-    res.status(200).json(product)
-  } catch (err) {
-    res.status(500).json({ error: "Failed to fetch product by name" });
-  }
-}
-
-// get products by category id
-const getProductsByCategoryId = async (req: Request, res: Response) => {
-  const categoryId = parseInt(req.params.categoryId)
-  try {
-    const products = await productRepository.getProductsByCategoryId(categoryId)
-    if(!products) {
-      res.status(404).json({ error: "Products not found" })
-      return
-    }
-    res.status(200).json(products)
-  } catch (err) {
-    res.status(500).json({ error: "Failed to fetch products by category id" })
-  }
-}
-
-// add product
-const addProduct = async (req: Request, res: Response) => {
-  const { productName, categoryId, price, image, description, discountPercentage, rating, sku } = req.body
-  if (!productName || !categoryId || !price || !image || !description || !rating || !sku) {
-    res.status(400).json({ error: "Missing required fields" });
-    return
-  }
-
-  try {
-    const newProduct = await productRepository.createProduct({
-      productName,
-      categoryId,
-      price,
-      image,
-      description,
-      discountPercentage,
-      rating,
-      sku
-    })
-    res.status(201).json(newProduct)
-  } catch (err) {
-    res.status(500).json({ error: "Failed to create product" });
-  }
-}
-
-// edit product by id
-const editProduct = async (req: Request<{ productId: string }, {}, Partial<Product>>, res: Response) => {
-  const id = parseInt(req.params.productId)
-  try {
-    const { productName, categoryId, price, image, description, discountPercentage, rating, sku } = req.body
-    const product = await productRepository.editProduct(id, {productName, categoryId, price, image, description, discountPercentage, rating, sku})
-
-    if (!product) {
-      res.status(404).json({ message: "Product not found" })
-      return
-    }
-
-    res.status(200).json(product)
-  } catch (err) {
-    res.status(500).json({ error: "Failed to edit product" });
-  }
-}
-
-// delete product by id
-const deleteProduct = async (req: Request, res: Response) => {
-  const id = parseInt(req.params.productId)
-  try {
-    await productRepository.deleteProduct(id)
-    res.status(200).json({ message: "Product deleted"})
-  } catch (err) {
-    res.status(500).json({ error: "Failed to delete product" });
-  }
-}
-
-export default {
-  getAllProducts,
-  getProductById,
-  getProductByName,
-  getProductsByCategoryId,
-  addProduct,
-  editProduct,
-  deleteProduct
-};

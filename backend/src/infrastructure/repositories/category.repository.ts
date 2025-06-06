@@ -1,13 +1,25 @@
 import { createClient } from "../database/dbClient";
 import { Category } from "../../domain/entities/category.entity";
 
-// Get all category
-const getAllCategory = async () => {
+// 共通のマッピング関数
+const mapRowToCategory = (row: any): Category => {
+  return new Category(
+    row.id,
+    row.category_name,
+    row.description,
+    row.image,
+    row.created_at,
+    row.updated_at
+  );
+};
+
+// Get all categories
+const getAllCategories = async (): Promise<Category[]> => {
   const client = createClient()
   try {
     await client.connect() // Open the connection
     const result = await client.query(`SELECT * FROM category ORDER BY category_name ASC`)
-    return result.rows
+    return result.rows.map(mapRowToCategory)
   } catch (err) {
     console.error(err)
     throw err
@@ -17,12 +29,12 @@ const getAllCategory = async () => {
 }
 
 // Get category by id
-const getCategoryById = async (id: number) => {
+const getCategoryById = async (id: number): Promise<Category | null> => {
   const client = createClient()
   try {
     await client.connect() // Open the connection
-    const result = await client.query(`SELECT * FROM category WHERE id = ${id}`)
-    return result.rows[0]
+    const result = await client.query(`SELECT * FROM category WHERE id = $1`, [id])
+    return result.rows[0] ? mapRowToCategory(result.rows[0]) : null
   } catch (err) {
     console.error(err)
     throw err
@@ -32,12 +44,12 @@ const getCategoryById = async (id: number) => {
 }
 
 // Get category by name
-const getCategoryByName = async (categoryName: string) => {
+const getCategoryByName = async (categoryName: string): Promise<Category | null> => {
   const client = createClient()
   try {
     await client.connect() // Open the connection
     const result = await client.query(`SELECT * FROM category WHERE category_name = $1`, [categoryName])
-    return result.rows[0]
+    return result.rows[0] ? mapRowToCategory(result.rows[0]) : null
   } catch (err) {
     console.error(err)
     throw err
@@ -47,13 +59,13 @@ const getCategoryByName = async (categoryName: string) => {
 }
 
 // Create category
-const createCategory = async (newCategory: Omit<Category, 'id' | 'createdAt' | 'updatedAt'>) => {
+const createCategory = async (newCategory: Omit<Category, 'id' | 'createdAt' | 'updatedAt'>): Promise<Category | null> => {
   const { categoryName, description, image } = newCategory
   const client = createClient()
   try {
     await client.connect() // Open the connection
     const result = await client.query(`INSERT INTO category (category_name, description, image) VALUES ($1, $2, $3) RETURNING *`, [categoryName, description, image])
-    return result.rows[0]
+    return result.rows[0] ? mapRowToCategory(result.rows[0]) : null
   } catch (err) {
     console.error(err)
     throw err
@@ -63,21 +75,21 @@ const createCategory = async (newCategory: Omit<Category, 'id' | 'createdAt' | '
 }
 
 // Edit category by id
-const editCategoryById = async (id: number, updateData: Partial<Category>) => {
+const editCategoryById = async (id: number, updateData: Partial<Category>): Promise<Category | null> => {
   const foundCategory = await getCategoryById(id)
   if (!foundCategory) {
-    return undefined
+    return null
   }
   const client = createClient()
   try {
     await client.connect() // Open the connection
     const newUpdate = {
-      name: updateData.categoryName ?? foundCategory.category_name,
+      name: updateData.categoryName ?? foundCategory.categoryName,
       description: updateData.description ?? foundCategory.description,
       image: updateData.image ?? foundCategory.image
     }
     const result = await client.query(`UPDATE category SET category_name = $1, description = $2, image = $3 WHERE id = $4 RETURNING *`, [newUpdate.name, newUpdate.description, newUpdate.image, id])
-    return result.rows[0]
+    return result.rows[0] ? mapRowToCategory(result.rows[0]) : null
   } catch (err) {
     console.error(err)
     throw err
@@ -87,16 +99,12 @@ const editCategoryById = async (id: number, updateData: Partial<Category>) => {
 }
 
 // Remove category by id
-const removeCategoryById = async (id: number) => {
-  const foundCategory = await getCategoryById(id)
-  if (!foundCategory) {
-    return undefined
-  }
+const removeCategoryById = async (id: number): Promise<Category | null> => {
   const client = createClient()
   try {
     await client.connect() // Open the connection
-    await client.query(`DELETE FROM category WHERE id = ${id}`)
-    return true
+    const result = await client.query(`DELETE FROM category WHERE id = $1 RETURNING *`, [id])
+    return result.rows[0] ? mapRowToCategory(result.rows[0]) : null
   } catch (err) {
     console.error(err)
     throw err
@@ -106,7 +114,7 @@ const removeCategoryById = async (id: number) => {
 }
 
 export default {
-  getAllCategory,
+  getAllCategories,
   getCategoryById,
   getCategoryByName,
   createCategory,
