@@ -4,7 +4,6 @@ export class Product {
   constructor(
     private readonly _id: number,
     private _productName: string,
-    private _categoryId: number,
     private _category: Category,
     private _price: number,
     private _image: string,
@@ -13,7 +12,7 @@ export class Product {
     private _rating: number,
     private _sku: string,
     private readonly _createdAt: string,
-    private _updatedAt: string
+    private _updatedAt: string,
   ) {}
 
   get id(): number {
@@ -25,7 +24,7 @@ export class Product {
   }
 
   get categoryId(): number {
-    return this._categoryId;
+    return this._category.id;
   }
 
   get category(): Category {
@@ -66,11 +65,6 @@ export class Product {
 
   updateProductName(name: string): void {
     this._productName = name;
-    this.touchUpdatedAt();
-  }
-
-  updateCategoryId(categoryId: number): void {
-    this._categoryId = categoryId;
     this.touchUpdatedAt();
   }
 
@@ -117,7 +111,6 @@ export class Product {
     return {
       id: this._id,
       productName: this._productName,
-      categoryId: this._categoryId,
       category: this._category.toPlainObject(),
       price: this._price,
       image: this._image,

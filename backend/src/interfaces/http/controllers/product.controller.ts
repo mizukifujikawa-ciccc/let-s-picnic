@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { ProductService } from "../../../application/service/product.service";
-import { Product } from "../../../domain/entities/product.entity";
+import { ProductCreateInput } from "../../../domain/repositories/product.repository";
 
 export function createProductController(productService: ProductService) {
   return {
@@ -16,7 +16,9 @@ export function createProductController(productService: ProductService) {
     getProductById: async (req: Request, res: Response) => {
       const id = parseInt(req.params.productId);
       if (isNaN(id)) {
-        res.status(400).json({ error: "Invalid product ID. Must be a number." });
+        res
+          .status(400)
+          .json({ error: "Invalid product ID. Must be a number." });
         return;
       }
       try {
@@ -48,20 +50,40 @@ export function createProductController(productService: ProductService) {
     getProductsByCategoryId: async (req: Request, res: Response) => {
       const categoryId = parseInt(req.params.categoryId);
       try {
-        const products = await productService.getProductsByCategoryId(categoryId);
+        const products =
+          await productService.getProductsByCategoryId(categoryId);
         if (!products) {
           res.status(404).json({ error: "Products not found" });
           return;
         }
         res.status(200).json(products);
       } catch (err) {
-        res.status(500).json({ error: "Failed to fetch products by category id" });
+        res
+          .status(500)
+          .json({ error: "Failed to fetch products by category id" });
       }
     },
 
     addProduct: async (req: Request, res: Response) => {
-      const { productName, categoryId, price, image, description, discountPercentage, rating, sku } = req.body;
-      if (!productName || !categoryId || !price || !image || !description || !rating || !sku) {
+      const {
+        productName,
+        categoryId,
+        price,
+        image,
+        description,
+        discountPercentage,
+        rating,
+        sku,
+      } = req.body;
+      if (
+        !productName ||
+        !categoryId ||
+        !price ||
+        !image ||
+        !description ||
+        !rating ||
+        !sku
+      ) {
         res.status(400).json({ error: "Missing required fields" });
         return;
       }
@@ -75,7 +97,7 @@ export function createProductController(productService: ProductService) {
           discountPercentage,
           rating,
           sku,
-        } as Omit<Product, 'id' | 'createdAt' | 'updatedAt' | 'category'>);
+        } as ProductCreateInput);
         res.status(201).json(product);
       } catch (err) {
         res.status(500).json({ error: "Failed to create product" });
@@ -83,8 +105,8 @@ export function createProductController(productService: ProductService) {
     },
 
     editProduct: async (
-      req: Request<{ productId: string }, {}, Partial<Omit<Product, 'category'>>>,
-      res: Response
+      req: Request<{ productId: string }, {}, Partial<ProductCreateInput>>,
+      res: Response,
     ) => {
       const id = parseInt(req.params.productId);
       try {

@@ -1,5 +1,8 @@
 import { Product } from "../../domain/entities/product.entity";
-import { ProductRepository } from "../../domain/repositories/product.repository";
+import {
+  ProductCreateInput,
+  ProductRepository,
+} from "../../domain/repositories/product.repository";
 
 export class ProductService {
   constructor(private readonly productRepository: ProductRepository) {}
@@ -20,15 +23,13 @@ export class ProductService {
     return this.productRepository.getProductsByCategoryId(categoryId);
   }
 
-  async addProduct(
-    data: Omit<Product, 'id' | 'createdAt' | 'updatedAt' | 'category'>
-  ): Promise<Product | null> {
+  async addProduct(data: ProductCreateInput): Promise<Product | null> {
     return this.productRepository.createProduct(data);
   }
 
   async editProduct(
     id: number,
-    data: Partial<Omit<Product, 'id' | 'createdAt' | 'updatedAt' | 'category'>>
+    data: Partial<ProductCreateInput>,
   ): Promise<Product | null> {
     return this.productRepository.editProduct(id, data);
   }
