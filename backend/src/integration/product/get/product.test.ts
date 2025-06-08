@@ -1,6 +1,6 @@
 const request = require('supertest');
-import app from "../../src/server";
-import { createClient } from '../../src/infrastructure/database/dbClient'
+import app from "../../../server";
+import { createClient } from '../../../infrastructure/database/dbClient'
 
 const client = createClient();
 
@@ -110,29 +110,3 @@ describe('GET /product', () => {
   });
 });
 
-// describe('POST /product', () => {
-//   it('should create a new product', async () => {
-//     const newProduct = {
-//       name: 'Product C',
-//       price: 200
-//     };
-
-//     const response = await request(app)
-//       .post('/products')
-//       .send(newProduct);
-    
-//     expect(response.status).toBe(201);
-//     expect(response.body).toHaveProperty('id');
-//     expect(response.body.name).toBe(newProduct.name);
-//     expect(response.body.price).toBe(newProduct.price);
-//   });
-// });
-
-// describe('DELETE /product/:id', () => {
-//   it('should delete a product', async () => {
-//     const response = await request(app).delete('/products/1');
-    
-//     expect(response.status).toBe(200);
-//     expect(response.body.message).toBe('Product deleted');
-//   });
-// });
