@@ -102,6 +102,88 @@ describe('GET /product', () => {
     }
   });
 
+  it('should return products by category id', async () => {
+    const response = await request(app).get('/product/category/1');
+
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveLength(1);
+
+    const product = response.body[0];
+    const expected = resultList[0];
+
+    expect(product.id).toBe(expected.id);
+    expect(product.productName).toBe(expected.productName);
+    expect(product.price).toBe(expected.price);
+    expect(product.image).toBe(expected.image);
+    expect(product.description).toBe(expected.description);
+    expect(product.category.id).toBe(expected.category.id);
+    expect(product.category.categoryName).toBe(expected.category.categoryName);
+    expect(product.category.description).toBe(expected.category.description);
+    expect(product.category.image).toBe(expected.category.image);
+    expect(product.discountPercentage).toBe(expected.discountPercentage);
+    expect(product.rating).toBe(expected.rating);
+    expect(product.sku).toBe(expected.sku);
+
+    expect(product.category.createdAt).not.toBeNull();
+    expect(product.category.updatedAt).not.toBeNull();
+    expect(product.createdAt).not.toBeNull();
+    expect(product.updatedAt).not.toBeNull();
+  });
+
+  it('should return product by name', async () => {
+    const response = await request(app).get('/product/search/' + encodeURIComponent('Test Product A'));
+
+    expect(response.status).toBe(200);
+
+    const product = response.body;
+    const expected = resultList[0];
+
+    expect(product.id).toBe(expected.id);
+    expect(product.productName).toBe(expected.productName);
+    expect(product.price).toBe(expected.price);
+    expect(product.image).toBe(expected.image);
+    expect(product.description).toBe(expected.description);
+    expect(product.category.id).toBe(expected.category.id);
+    expect(product.category.categoryName).toBe(expected.category.categoryName);
+    expect(product.category.description).toBe(expected.category.description);
+    expect(product.category.image).toBe(expected.category.image);
+    expect(product.discountPercentage).toBe(expected.discountPercentage);
+    expect(product.rating).toBe(expected.rating);
+    expect(product.sku).toBe(expected.sku);
+
+    expect(product.category.createdAt).not.toBeNull();
+    expect(product.category.updatedAt).not.toBeNull();
+    expect(product.createdAt).not.toBeNull();
+    expect(product.updatedAt).not.toBeNull();
+  });
+
+  it('should return product by id', async () => {
+    const response = await request(app).get('/product/1');
+
+    expect(response.status).toBe(200);
+
+    const product = response.body;
+    const expected = resultList[0];
+
+    expect(product.id).toBe(expected.id);
+    expect(product.productName).toBe(expected.productName);
+    expect(product.price).toBe(expected.price);
+    expect(product.image).toBe(expected.image);
+    expect(product.description).toBe(expected.description);
+    expect(product.category.id).toBe(expected.category.id);
+    expect(product.category.categoryName).toBe(expected.category.categoryName);
+    expect(product.category.description).toBe(expected.category.description);
+    expect(product.category.image).toBe(expected.category.image);
+    expect(product.discountPercentage).toBe(expected.discountPercentage);
+    expect(product.rating).toBe(expected.rating);
+    expect(product.sku).toBe(expected.sku);
+
+    expect(product.category.createdAt).not.toBeNull();
+    expect(product.category.updatedAt).not.toBeNull();
+    expect(product.createdAt).not.toBeNull();
+    expect(product.updatedAt).not.toBeNull();
+  });
+
   // テスト終了後にデータを削除
   afterAll(async () => {
     await client.query('DELETE FROM "product"');
