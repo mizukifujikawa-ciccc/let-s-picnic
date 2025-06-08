@@ -1,6 +1,6 @@
 const request = require('supertest');
-import app from "../../../server";
-import { createClient } from '../../../infrastructure/database/dbClient'
+import app from "../../server";
+import { createClient } from '../../infrastructure/database/dbClient'
 
 const client = createClient();
 
