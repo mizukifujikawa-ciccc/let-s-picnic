@@ -7,7 +7,7 @@ export function createProductController(productService: ProductService) {
     getAllProducts: async (_req: Request, res: Response) => {
       try {
         const products = await productService.getAllProducts();
-        res.status(200).json(products);
+        res.status(200).json(products.map(product => product.toPlainObject()));
       } catch (err) {
         res.status(500).json({ error: "Failed to fetch products" });
       }
@@ -27,7 +27,7 @@ export function createProductController(productService: ProductService) {
           res.status(404).json({ error: "Product not found" });
           return;
         }
-        res.status(200).json(product);
+        res.status(200).json(product?.toPlainObject());
       } catch (err) {
         res.status(500).json({ error: "Failed to fetch product by id" });
       }
@@ -41,7 +41,7 @@ export function createProductController(productService: ProductService) {
           res.status(404).json({ error: "Product not found" });
           return;
         }
-        res.status(200).json(product);
+        res.status(200).json(product?.toPlainObject());
       } catch (err) {
         res.status(500).json({ error: "Failed to fetch product by name" });
       }
@@ -56,7 +56,7 @@ export function createProductController(productService: ProductService) {
           res.status(404).json({ error: "Products not found" });
           return;
         }
-        res.status(200).json(products);
+        res.status(200).json(products.map(product => product.toPlainObject()));
       } catch (err) {
         res
           .status(500)
@@ -98,7 +98,7 @@ export function createProductController(productService: ProductService) {
           rating,
           sku,
         } as ProductCreateInput);
-        res.status(201).json(product);
+        res.status(201).json(product?.toPlainObject());
       } catch (err) {
         res.status(500).json({ error: "Failed to create product" });
       }
@@ -115,7 +115,7 @@ export function createProductController(productService: ProductService) {
           res.status(404).json({ message: "Product not found" });
           return;
         }
-        res.status(200).json(product);
+        res.status(200).json(product?.toPlainObject());
       } catch (err) {
         res.status(500).json({ error: "Failed to edit product" });
       }

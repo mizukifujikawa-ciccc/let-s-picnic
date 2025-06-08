@@ -7,7 +7,7 @@ export function createCategoryController(categoryService: CategoryService) {
     getAllCategories: async (_req: Request, res: Response) => {
       try {
         const categories = await categoryService.getAllCategories();
-        res.status(200).json(categories);
+        res.status(200).json(categories.map(category => category.toPlainObject()));
       } catch (err) {
         res.status(500).json({ error: "Failed to fetch category" });
       }
@@ -21,7 +21,7 @@ export function createCategoryController(categoryService: CategoryService) {
           res.status(404).json({ error: "Category not found" });
           return;
         }
-        res.status(200).json(category);
+        res.status(200).json(category.toPlainObject());
       } catch (err) {
         res.status(500).json({ error: "Something went wrong" });
       }
@@ -43,7 +43,7 @@ export function createCategoryController(categoryService: CategoryService) {
           res.status(409).json({ error: "Category is already registered" });
           return;
         }
-        res.status(201).json(newCategory);
+        res.status(201).json(newCategory.toPlainObject());
       } catch (err) {
         res.status(500).json({ error: "Failed to create category" });
       }
@@ -60,7 +60,7 @@ export function createCategoryController(categoryService: CategoryService) {
           res.status(404).json({ error: "Category is not found" });
           return;
         }
-        res.status(200).json(category);
+        res.status(200).json(category.toPlainObject());
       } catch (err) {
         res.status(500).json({ error: "Failed to edit category" });
       }
