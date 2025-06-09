@@ -13,8 +13,8 @@ export class CartService {
     return this.cartRepository.getCartByUserId(userId);
   }
 
-  updateCartByUserId(userId: number, items: { productId: number; quantity: number }[]): Promise<CartDetail | undefined> {
-    return this.cartRepository.updateCartByUserId(userId, items);
+  updateCartByUserId(userId: number, item: { productId: number; quantity: number }): Promise<CartDetail | undefined> {
+    return this.cartRepository.updateCartByUserId(userId, item);
   }
 
   deleteCartItemByUserId(userId: number, cartItemId: number): Promise<void> {

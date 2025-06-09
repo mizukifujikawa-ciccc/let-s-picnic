@@ -156,7 +156,7 @@ const getCartByUserId = async (userId: number): Promise<CartDetail> => {
 
 const updateCartByUserId = async (
   userId: number,
-  items: { productId: number; quantity: number }[]
+  item: { productId: number; quantity: number }
 ): Promise<CartDetail | undefined> => {
   const client = createClient();
   const errors: string[] = [];
@@ -167,21 +167,17 @@ const updateCartByUserId = async (
     if (cartRes.rows.length === 0) return undefined;
     const cartId = cartRes.rows[0].id;
 
-    for (const item of items) {
-      const { productId, quantity } = item;
-      const productCheck = await client.query('SELECT id FROM product WHERE id = $1', [productId]);
-      if (productCheck.rows.length === 0) {
-        errors.push(`Product ID ${productId} not found`);
-        continue;
-      }
+    const { productId, quantity } = item;
+    const productCheck = await client.query('SELECT id FROM product WHERE id = $1', [productId]);
+    if (productCheck.rows.length === 0) {
+      errors.push(`Product ID ${productId} not found`);
+    } else {
       const cartItemRes = await client.query('SELECT id FROM cart_item WHERE cart_id = $1 AND product_id = $2', [cartId, productId]);
       if (quantity === 0) {
         if (cartItemRes.rows.length > 0) {
           await client.query('DELETE FROM cart_item WHERE id = $1', [cartItemRes.rows[0].id]);
         }
-        continue;
-      }
-      if (cartItemRes.rows.length > 0) {
+      } else if (cartItemRes.rows.length > 0) {
         await client.query('UPDATE cart_item SET quantity = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2', [quantity, cartItemRes.rows[0].id]);
       } else {
         await client.query('INSERT INTO cart_item (cart_id, product_id, quantity) VALUES ($1, $2, $3)', [cartId, productId, quantity]);
