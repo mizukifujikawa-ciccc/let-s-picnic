@@ -55,31 +55,24 @@ export function createCartController(cartService: CartService) {
 
     editCartByUserId: async (req: Request, res: Response) => {
       const userId = parseInt(req.params.userId);
-      const items = req.body;
+      const item = req.body;
 
       if (isNaN(userId)) {
         res.status(400).json({ error: 'Invalid user ID. Must be a number.' });
         return;
       }
 
-      if (!Array.isArray(items)) {
-        res.status(400).json({ error: 'Request body must be an array of items.' });
+      if (
+        typeof item.productId !== 'number' ||
+        typeof item.quantity !== 'number' ||
+        item.quantity < 0
+      ) {
+        res.status(400).json({ error: 'Request body must contain valid productId and quantity (≥ 0).' });
         return;
       }
 
-      for (const item of items) {
-        if (
-          typeof item.productId !== 'number' ||
-          typeof item.quantity !== 'number' ||
-          item.quantity < 0
-        ) {
-          res.status(400).json({ error: 'Each item must have valid productId and quantity (≥ 0).' });
-          return;
-        }
-      }
-
       try {
-        const updated = await cartService.updateCartByUserId(userId, items);
+        const updated = await cartService.updateCartByUserId(userId, item);
         if (!updated) {
           res.status(404).json({ error: 'Cart not found.' });
           return;
