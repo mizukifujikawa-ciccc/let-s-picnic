@@ -20,28 +20,6 @@ const mapRowToCartItem = (row: any): CartItem => {
   );
 };
 
-const getAllCarts = async (): Promise<Cart[]> => {
-  const client = createClient();
-  try {
-    await client.connect();
-    const result = await client.query('SELECT * FROM cart ORDER BY user_id ASC');
-    return result.rows.map(mapRowToCart);
-  } finally {
-    await client.end();
-  }
-};
-
-const getAllCartItems = async (): Promise<CartItem[]> => {
-  const client = createClient();
-  try {
-    await client.connect();
-    const result = await client.query('SELECT * FROM cart_item ORDER BY product_id ASC');
-    return result.rows.map(mapRowToCartItem);
-  } finally {
-    await client.end();
-  }
-};
-
 const createCartByUserId = async (userId: number): Promise<Cart> => {
   const client = createClient();
   try {
@@ -185,7 +163,7 @@ const updateCartByUserId = async (
 
   try {
     await client.connect();
-    const cartRes = await client.query('SELECT id FROM cart WHERE user_id = $1 AND status = \"active\"', [userId]);
+    const cartRes = await client.query('SELECT id FROM cart WHERE user_id = $1 AND status = \'active\'', [userId]);
     if (cartRes.rows.length === 0) return undefined;
     const cartId = cartRes.rows[0].id;
 
@@ -235,37 +213,17 @@ const deleteCartByUserId = async (userId: number): Promise<void> => {
   const client = createClient();
   try {
     await client.connect();
-    await client.query('DELETE FROM cart WHERE user_id = $1', [userId]);
-  } finally {
-    await client.end();
-  }
-};
-
-const updateCartStatusByUserId = async (
-  userId: number,
-  status: 'active' | 'purchased' | 'delete'
-): Promise<Cart | null> => {
-  const client = createClient();
-  try {
-    await client.connect();
-    const result = await client.query(
-      `UPDATE cart SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE user_id = $2 AND status = 'active' RETURNING *`,
-      [status, userId]
-    );
-    return result.rows[0] ? mapRowToCart(result.rows[0]) : null;
+    await client.query('UPDATE cart SET status = \'deleted\' WHERE user_id = $1', [userId]);
   } finally {
     await client.end();
   }
 };
 
 export default {
-  getAllCarts,
-  getAllCartItems,
   createCartByUserId,
   addCartItem,
   getCartByUserId,
   updateCartByUserId,
   deleteCartItemByUserId,
-  deleteCartByUserId,
-  updateCartStatusByUserId
+  deleteCartByUserId
 } as CartRepository;

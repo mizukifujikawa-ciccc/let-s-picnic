@@ -5,18 +5,6 @@ import { CartRepository, CartDetail } from '../../domain/repositories/cart.repos
 export class CartService {
   constructor(private readonly cartRepository: CartRepository) {}
 
-  getAllCarts(): Promise<Cart[]> {
-    return this.cartRepository.getAllCarts();
-  }
-
-  getAllCartItems(): Promise<CartItem[]> {
-    return this.cartRepository.getAllCartItems();
-  }
-
-  createCartByUserId(userId: number): Promise<Cart> {
-    return this.cartRepository.createCartByUserId(userId);
-  }
-
   addCartItem(userId: number, productId: number, quantity: number): Promise<CartItem> {
     return this.cartRepository.addCartItem(userId, productId, quantity);
   }
@@ -37,7 +25,4 @@ export class CartService {
     return this.cartRepository.deleteCartByUserId(userId);
   }
 
-  updateCartStatusByUserId(userId: number, status: 'active' | 'purchased' | 'delete'): Promise<Cart | null> {
-    return this.cartRepository.updateCartStatusByUserId(userId, status);
-  }
 }

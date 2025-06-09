@@ -3,37 +3,19 @@ import { CartService } from '../../../application/service/cart.service';
 
 export function createCartController(cartService: CartService) {
   return {
-    getAllCarts: async (_req: Request, res: Response) => {
-      try {
-        const carts = await cartService.getAllCarts();
-        res.status(200).json(carts.map(c => c.toPlainObject()));
-      } catch {
-        res.status(500).json({ error: 'Failed to fetch carts' });
-      }
-    },
-
-    getAllCartItems: async (_req: Request, res: Response) => {
-      try {
-        const items = await cartService.getAllCartItems();
-        res.status(200).json(items.map(i => i.toPlainObject()));
-      } catch {
-        res.status(500).json({ error: 'Failed to fetch cart items' });
-      }
-    },
-
-    createCartByUser: async (req: Request, res: Response) => {
-      try {
-        const userId = parseInt(req.body.userId);
-        if (isNaN(userId)) {
-          res.status(400).json({ error: 'Invalid user ID. Must be a number.' });
-          return;
-        }
-        const cart = await cartService.createCartByUserId(userId);
-        res.status(201).json(cart.toPlainObject());
-      } catch {
-        res.status(500).json({ error: 'Failed to creat cart' });
-      }
-    },
+    // createCartByUser: async (req: Request, res: Response) => {
+    //   try {
+    //     const userId = parseInt(req.body.userId);
+    //     if (isNaN(userId)) {
+    //       res.status(400).json({ error: 'Invalid user ID. Must be a number.' });
+    //       return;
+    //     }
+    //     const cart = await cartService.createCartByUserId(userId);
+    //     res.status(201).json(cart.toPlainObject());
+    //   } catch {
+    //     res.status(500).json({ error: 'Failed to creat cart' });
+    //   }
+    // },
 
     addCartItemByUserId: async (req: Request, res: Response) => {
       try {
@@ -135,32 +117,6 @@ export function createCartController(cartService: CartService) {
       } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Failed to delete cart' });
-      }
-    },
-
-    updateCartStatusByUserId: async (req: Request, res: Response) => {
-      try {
-        const userId = parseInt(req.params.userId);
-        const { status } = req.body;
-
-        if (isNaN(userId)) {
-          res.status(400).json({ error: 'Invalid user ID. Must be a number.' });
-          return;
-        }
-
-        if (!['active', 'purchased', 'delete'].includes(status)) {
-          res.status(400).json({ error: "Invalid status. Must be one of 'active', 'purchased', or 'delete'." });
-          return;
-        }
-
-        const updatedCart = await cartService.updateCartStatusByUserId(userId, status);
-        if (!updatedCart) {
-          res.status(404).json({ error: 'Cart not found or already updated.' });
-          return;
-        }
-        res.status(200).json(updatedCart.toPlainObject());
-      } catch {
-        res.status(500).json({ error: 'Failed to update cart status' });
       }
     }
   };
