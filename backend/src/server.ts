@@ -12,6 +12,7 @@ import { connectDb } from './infrastructure/database/dbClient'
 import userRouter from './interfaces/http/routes/user.routes'
 import categoryRouter from './interfaces/http/routes/category.routes'
 import productRouter from './interfaces/http/routes/product.routes'
+import cartRouter from './interfaces/http/routes/cart.routes'
 
 // Create server
 const app = express()
@@ -38,6 +39,7 @@ app.use(cookieSession({
 app.use('/user', userRouter);
 app.use('/category', categoryRouter);
 app.use('/product', productRouter)
+app.use('/cart', cartRouter)
 
 // Fallback
 app.use((req: Request, res: Response) => {
