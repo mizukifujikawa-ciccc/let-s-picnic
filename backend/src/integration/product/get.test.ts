@@ -46,6 +46,27 @@ describe('GET /product', () => {
       "createdAt": "2025-05-15T16:44:35.412Z",
       "updatedAt": "2025-05-15T16:44:35.412Z"
   }
+    ,
+    {
+      "id": 3,
+      "productName": "Test Product C",
+      "category": {
+          "id": 1,
+          "categoryName": "Test category A",
+          "description": "Description for category A",
+          "image": "https://dummyjson.image/groceries",
+          "createdAt": "2025-05-15T16:15:39.848Z",
+          "updatedAt": "2025-05-15T16:15:39.848Z"
+      },
+      "price": "39.99",
+      "image": "https://example.com/imageC.webp",
+      "description": "Description for product C",
+      "discountPercentage": 5,
+      "rating": "4.70",
+      "sku": "ggg-hhh-iii",
+      "createdAt": "2025-05-15T16:44:35.415Z",
+      "updatedAt": "2025-05-15T16:44:35.415Z"
+    }
   ]
 
   // テスト用データを挿入
@@ -64,7 +85,8 @@ describe('GET /product', () => {
       INSERT INTO product (id, product_name, category_id, price, image, description, discount_percentage, rating, sku)
       VALUES
       (1, 'Test Product A', 1, 19.99, 'https://example.com/imageA.webp', 'Description for product A', 10, 4.90, 'aaa-bbb-ccc'),
-      (2, 'Test Product B', 2, 29.99, 'https://example.com/imageB.webp', 'Description for product B', 15, 4.60, 'ddd-eee-fff');
+      (2, 'Test Product B', 2, 29.99, 'https://example.com/imageB.webp', 'Description for product B', 15, 4.60, 'ddd-eee-fff'),
+      (3, 'Test Product C', 1, 39.99, 'https://example.com/imageC.webp', 'Description for product C', 5, 4.70, 'ggg-hhh-iii');
     `);
   });
 
@@ -75,7 +97,7 @@ describe('GET /product', () => {
     // ステータスコードが200であることを確認
     expect(response.status).toBe(200);
 
-    // レスポンスのデータが2つの商品であることを確認
+    // レスポンスのデータが3つの商品であることを確認
     expect(response.body).toHaveLength(resultList.length);
 
     // 期待する結果と照らし合わせてチェック
@@ -106,28 +128,31 @@ describe('GET /product', () => {
     const response = await request(app).get('/product/category/1');
 
     expect(response.status).toBe(200);
-    expect(response.body).toHaveLength(1);
+    const expectedProducts = [resultList[0], resultList[2]];
+    expect(response.body).toHaveLength(expectedProducts.length);
 
-    const product = response.body[0];
-    const expected = resultList[0];
+    for (let i = 0; i < expectedProducts.length; i++) {
+      const product = response.body[i];
+      const expected = expectedProducts[i];
 
-    expect(product.id).toBe(expected.id);
-    expect(product.productName).toBe(expected.productName);
-    expect(product.price).toBe(expected.price);
-    expect(product.image).toBe(expected.image);
-    expect(product.description).toBe(expected.description);
-    expect(product.category.id).toBe(expected.category.id);
-    expect(product.category.categoryName).toBe(expected.category.categoryName);
-    expect(product.category.description).toBe(expected.category.description);
-    expect(product.category.image).toBe(expected.category.image);
-    expect(product.discountPercentage).toBe(expected.discountPercentage);
-    expect(product.rating).toBe(expected.rating);
-    expect(product.sku).toBe(expected.sku);
+      expect(product.id).toBe(expected.id);
+      expect(product.productName).toBe(expected.productName);
+      expect(product.price).toBe(expected.price);
+      expect(product.image).toBe(expected.image);
+      expect(product.description).toBe(expected.description);
+      expect(product.category.id).toBe(expected.category.id);
+      expect(product.category.categoryName).toBe(expected.category.categoryName);
+      expect(product.category.description).toBe(expected.category.description);
+      expect(product.category.image).toBe(expected.category.image);
+      expect(product.discountPercentage).toBe(expected.discountPercentage);
+      expect(product.rating).toBe(expected.rating);
+      expect(product.sku).toBe(expected.sku);
 
-    expect(product.category.createdAt).not.toBeNull();
-    expect(product.category.updatedAt).not.toBeNull();
-    expect(product.createdAt).not.toBeNull();
-    expect(product.updatedAt).not.toBeNull();
+      expect(product.category.createdAt).not.toBeNull();
+      expect(product.category.updatedAt).not.toBeNull();
+      expect(product.createdAt).not.toBeNull();
+      expect(product.updatedAt).not.toBeNull();
+    }
   });
 
   it('should return product by name', async () => {
