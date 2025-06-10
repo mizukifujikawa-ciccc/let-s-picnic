@@ -1,15 +1,11 @@
 import { Cart } from '../entities/cart.entity';
 import { CartItem } from '../entities/cartItem.entity';
+import { User } from '../entities/user.entity';
 
 export interface CartDetail {
-  user: {
-    userId: number;
-    firstName: string;
-    lastName: string;
-    role: string;
-    cartId: number | null;
-    cartItems: CartItem[];
-  };
+  id: number | null;
+  user: User;
+  cartItems: CartItem[];
   errors?: string[];
 }
 

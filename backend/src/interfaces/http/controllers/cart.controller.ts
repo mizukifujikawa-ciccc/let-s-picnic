@@ -42,10 +42,9 @@ export function createCartController(cartService: CartService) {
       try {
         const cart = await cartService.getCartByUserId(userId);
         res.status(200).json({
-          user: {
-            ...cart.user,
-            cartItems: cart.user.cartItems.map(i => i.toPlainObject())
-          },
+          id: cart.id,
+          user: cart.user.toPlainObject(),
+          cartItems: cart.cartItems.map(i => i.toPlainObject()),
           errors: cart.errors
         });
       } catch {
@@ -78,10 +77,9 @@ export function createCartController(cartService: CartService) {
           return;
         }
         res.status(200).json({
-          user: {
-            ...updated.user,
-            cartItems: updated.user.cartItems.map(i => i.toPlainObject())
-          },
+          id: updated.id,
+          user: updated.user.toPlainObject(),
+          cartItems: updated.cartItems.map(i => i.toPlainObject()),
           errors: updated.errors
         });
       } catch (err) {

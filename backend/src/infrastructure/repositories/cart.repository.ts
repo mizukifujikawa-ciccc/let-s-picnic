@@ -4,6 +4,7 @@ import { CartItem } from '../../domain/entities/cartItem.entity';
 import { Product } from '../../domain/entities/product.entity';
 import { Category } from '../../domain/entities/category.entity';
 import { CartRepository, CartDetail } from '../../domain/repositories/cart.repository';
+import { User } from '../../domain/entities/user.entity';
 
 const mapRowToCart = (row: any): Cart => {
   return new Cart(row.id, row.user_id, row.status, row.created_at, row.updated_at);
@@ -65,35 +66,36 @@ const addCartItem = async (userId: number, productId: number, quantity: number):
   }
 };
 
+
 const getCartByUserId = async (userId: number): Promise<CartDetail> => {
   const client = createClient();
   try {
     await client.connect();
-    const userCartResult = await client.query(
-      `SELECT u.id AS "userId", u.firstname AS "firstName", u.lastname AS "lastName", u.role, c.id AS "cartId"
-       FROM "user" u
-       JOIN cart c ON u.id = c.user_id
-       WHERE u.id = $1 AND c.status = 'active'`,
+
+    const userRes = await client.query(
+      `SELECT id AS "userId", firstname AS "firstName", lastname AS "lastName", email, password, role, created_at AS "createdAt", updated_at AS "updatedAt" FROM "user" WHERE id = $1`,
       [userId]
     );
 
-    if (userCartResult.rows.length === 0) {
-      const userOnly = await client.query(
-        `SELECT id AS "userId", firstname AS "firstName", lastname AS "lastName", role FROM "user" WHERE id = $1`,
-        [userId]
-      );
-      return {
-        user: {
-          ...userOnly.rows[0],
-          cartId: null,
-          cartItems: []
-        }
-      };
+    if (userRes.rows.length === 0) {
+      throw new Error('User not found');
     }
 
-    const userCart = userCartResult.rows[0];
+    const u = userRes.rows[0];
+    const user = new User(u.userId, u.firstName, u.lastName, u.email, u.password, u.role, u.createdAt, u.updatedAt);
+
+    const cartRes = await client.query(
+      `SELECT id FROM cart WHERE user_id = $1 AND status = 'active' LIMIT 1`,
+      [userId]
+    );
+
+    if (cartRes.rows.length === 0) {
+      return { id: null, user, cartItems: [] };
+    }
+
+    const cartId = cartRes.rows[0].id;
     const cartItemsRes = await client.query(
-      `SELECT ci.id AS "cartItemId", ci.quantity, ci.product_id, ci.created_at, ci.updated_at,
+      `SELECT ci.id AS "cartItemId", ci.quantity, ci.created_at, ci.updated_at,
               p.id AS "productId", p.product_name, p.price, p.image, p.description,
               p.discount_percentage, p.rating, p.sku,
               cat.id AS "categoryId", cat.category_name, cat.description AS category_description,
@@ -102,7 +104,7 @@ const getCartByUserId = async (userId: number): Promise<CartDetail> => {
          JOIN product p ON ci.product_id = p.id
          JOIN category cat ON p.category_id = cat.id
          WHERE ci.cart_id = $1`,
-      [userCart.cartId]
+      [cartId]
     );
 
     const cartItems = cartItemsRes.rows.map(row => {
@@ -114,6 +116,7 @@ const getCartByUserId = async (userId: number): Promise<CartDetail> => {
         row.category_created_at,
         row.category_updated_at
       );
+
       const product = new Product(
         row.productId,
         row.product_name,
@@ -127,33 +130,23 @@ const getCartByUserId = async (userId: number): Promise<CartDetail> => {
         row.created_at,
         row.updated_at
       );
-      const item = new CartItem(
+
+      return new CartItem(
         row.cartItemId,
-        userCart.cartId,
+        cartId,
         row.productId,
         row.quantity,
         row.created_at,
         row.updated_at,
         product
       );
-      return item;
     });
 
-    return {
-      user: {
-        userId: userCart.userId,
-        firstName: userCart.firstName,
-        lastName: userCart.lastName,
-        role: userCart.role,
-        cartId: userCart.cartId,
-        cartItems
-      }
-    };
+    return { id: cartId, user, cartItems };
   } finally {
     await client.end();
   }
 };
-
 const updateCartByUserId = async (
   userId: number,
   item: { productId: number; quantity: number }
@@ -193,7 +186,7 @@ const updateCartByUserId = async (
 
 const deleteCartItemByUserId = async (userId: number, cartItemId: number): Promise<void> => {
   const cart = await getCartByUserId(userId);
-  if (!cart.user.cartId) return;
+  if (!cart.id) return;
   const client = createClient();
   try {
     await client.connect();
@@ -205,7 +198,7 @@ const deleteCartItemByUserId = async (userId: number, cartItemId: number): Promi
 
 const deleteCartByUserId = async (userId: number): Promise<void> => {
   const cart = await getCartByUserId(userId);
-  if (!cart.user.cartId) return;
+  if (!cart.id) return;
   const client = createClient();
   try {
     await client.connect();
