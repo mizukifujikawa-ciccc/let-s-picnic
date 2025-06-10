@@ -18,7 +18,7 @@ describe('GET /product', () => {
             "updatedAt": "2025-05-15T16:15:39.848Z"
         },
         "price": "19.99",
-        "image": "https://example.com/imageA.webp",
+        "mainImage": "https://example.com/imageA.webp",
         "description": "Description for product A",
         "discountPercentage": 10,
         "rating": "4.90",
@@ -38,7 +38,7 @@ describe('GET /product', () => {
           "updatedAt": "2025-05-15T16:15:31.491Z"
       },
       "price": "29.99",
-      "image": "https://example.com/imageB.webp",
+      "mainImage": "https://example.com/imageB.webp",
       "description": "Description for product B",
       "discountPercentage": 15,
       "rating": "4.60",
@@ -59,7 +59,7 @@ describe('GET /product', () => {
           "updatedAt": "2025-05-15T16:15:39.848Z"
       },
       "price": "39.99",
-      "image": "https://example.com/imageC.webp",
+      "mainImage": "https://example.com/imageC.webp",
       "description": "Description for product C",
       "discountPercentage": 5,
       "rating": "4.70",
@@ -82,7 +82,7 @@ describe('GET /product', () => {
     `);
 
     await client.query(`
-      INSERT INTO product (id, product_name, category_id, price, image, description, discount_percentage, rating, sku)
+      INSERT INTO product (id, product_name, category_id, price, main_image, description, discount_percentage, rating, sku)
       VALUES
       (1, 'Test Product A', 1, 19.99, 'https://example.com/imageA.webp', 'Description for product A', 10, 4.90, 'aaa-bbb-ccc'),
       (2, 'Test Product B', 2, 29.99, 'https://example.com/imageB.webp', 'Description for product B', 15, 4.60, 'ddd-eee-fff'),
@@ -107,7 +107,7 @@ describe('GET /product', () => {
 
       expect(product.productName).toBe(expected.productName);
       expect(product.price).toBe(expected.price);
-      expect(product.image).toBe(expected.image);
+      expect(product.mainImage).toBe(expected.mainImage);
       expect(product.description).toBe(expected.description);
       expect(product.category.id).toBe(expected.category.id);
       expect(product.category.categoryName).toBe(expected.category.categoryName);
@@ -138,7 +138,7 @@ describe('GET /product', () => {
       expect(product.id).toBe(expected.id);
       expect(product.productName).toBe(expected.productName);
       expect(product.price).toBe(expected.price);
-      expect(product.image).toBe(expected.image);
+      expect(product.mainImage).toBe(expected.mainImage);
       expect(product.description).toBe(expected.description);
       expect(product.category.id).toBe(expected.category.id);
       expect(product.category.categoryName).toBe(expected.category.categoryName);
@@ -166,7 +166,7 @@ describe('GET /product', () => {
     expect(product.id).toBe(expected.id);
     expect(product.productName).toBe(expected.productName);
     expect(product.price).toBe(expected.price);
-    expect(product.image).toBe(expected.image);
+    expect(product.mainImage).toBe(expected.mainImage);
     expect(product.description).toBe(expected.description);
     expect(product.category.id).toBe(expected.category.id);
     expect(product.category.categoryName).toBe(expected.category.categoryName);
@@ -193,7 +193,7 @@ describe('GET /product', () => {
     expect(product.id).toBe(expected.id);
     expect(product.productName).toBe(expected.productName);
     expect(product.price).toBe(expected.price);
-    expect(product.image).toBe(expected.image);
+    expect(product.mainImage).toBe(expected.mainImage);
     expect(product.description).toBe(expected.description);
     expect(product.category.id).toBe(expected.category.id);
     expect(product.category.categoryName).toBe(expected.category.categoryName);

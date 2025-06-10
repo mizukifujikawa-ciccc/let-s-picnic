@@ -102,7 +102,7 @@ const getCartByUserId = async (userId: number): Promise<Cart> => {
     const cartId = cart.id as number;
     const cartItemsRes = await client.query(
       `SELECT ci.id AS "cartItemId", ci.quantity, ci.created_at, ci.updated_at,
-              p.id AS "productId", p.product_name, p.price, p.image, p.description,
+              p.id AS "productId", p.product_name, p.price, p.main_image, p.description,
               p.discount_percentage, p.rating, p.sku,
               cat.id AS "categoryId", cat.category_name, cat.description AS category_description,
               cat.image AS category_image, cat.created_at AS category_created_at, cat.updated_at AS category_updated_at
@@ -128,7 +128,7 @@ const getCartByUserId = async (userId: number): Promise<Cart> => {
         row.product_name,
         category,
         row.price,
-        row.image,
+        row.main_image,
         row.description,
         row.discount_percentage,
         row.rating,

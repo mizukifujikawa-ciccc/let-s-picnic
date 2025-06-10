@@ -6,7 +6,7 @@ export class Product {
     private _productName: string,
     private _category: Category,
     private _price: number,
-    private _image: string,
+    private _mainImage: string,
     private _description: string,
     private _discountPercentage: number,
     private _rating: number,
@@ -35,8 +35,8 @@ export class Product {
     return this._price;
   }
 
-  get image(): string {
-    return this._image;
+  get mainImage(): string {
+    return this._mainImage;
   }
 
   get description(): string {
@@ -78,8 +78,8 @@ export class Product {
     this.touchUpdatedAt();
   }
 
-  updateImage(image: string): void {
-    this._image = image;
+  updateMainImage(image: string): void {
+    this._mainImage = image;
     this.touchUpdatedAt();
   }
 
@@ -113,7 +113,7 @@ export class Product {
       productName: this._productName,
       category: this._category.toPlainObject(),
       price: this._price,
-      image: this._image,
+      mainImage: this._mainImage,
       description: this._description,
       discountPercentage: this._discountPercentage,
       rating: this._rating,
