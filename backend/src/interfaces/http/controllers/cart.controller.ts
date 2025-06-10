@@ -19,6 +19,31 @@ export function createCartController(cartService: CartService) {
       }
     },
 
+    editAddressByUserId: async (req: Request, res: Response) => {
+      const userId = parseInt(req.params.userId);
+      const { shippingAddress } = req.body;
+
+      if (isNaN(userId)) {
+        res.status(400).json({ error: 'Invalid user ID. Must be a number.' });
+        return;
+      }
+      if (typeof shippingAddress !== 'string' || shippingAddress.length === 0) {
+        res.status(400).json({ error: 'Invalid shipping address.' });
+        return;
+      }
+      try {
+        const cart = await cartService.editAddressByUserId(userId, shippingAddress);
+        if (!cart) {
+          res.status(404).json({ error: 'Cart not found.' });
+          return;
+        }
+        res.status(200).json(cart.toPlainObject());
+      } catch (err) {
+        console.error('editAddressByUserId error:', err);
+        res.status(500).json({ error: 'Failed to update address.' });
+      }
+    },
+
     getCartByUserId: async (req: Request, res: Response) => {
       const userId = parseInt(req.params.userId);
       if (isNaN(userId)) {

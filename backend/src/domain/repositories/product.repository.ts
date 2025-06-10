@@ -4,7 +4,7 @@ export interface ProductCreateInput {
   productName: string;
   categoryId: number;
   price: number;
-  image: string;
+  mainImage: string;
   description: string;
   discountPercentage: number;
   rating: number;

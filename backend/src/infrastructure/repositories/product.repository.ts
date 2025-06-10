@@ -17,7 +17,7 @@ const mapRowToProduct = (row: any): Product => {
     row.product_name,
     category,
     row.price,
-    row.product_image ?? row.image,
+    row.product_image ?? row.main_image,
     row.product_description ?? row.description,
     row.discount_percentage,
     row.rating,
@@ -35,7 +35,7 @@ const getAllProducts = async (): Promise<Product[]> => {
     const result = await client.query(
       `SELECT
         product.id as product_id,
-        product.image as product_image,
+        product.main_image as product_image,
         product.description as product_description,
         product.*,
         category.category_name as category_name,
@@ -65,7 +65,7 @@ const getProductById = async (id: number): Promise<Product | null> => {
     const result = await client.query(
       `SELECT
         product.id as product_id,
-        product.image as product_image,
+        product.main_image as product_image,
         product.description as product_description,
         product.*,
         category.category_name as category_name,
@@ -98,7 +98,7 @@ const getProductByName = async (
     const result = await client.query(
       `SELECT
         product.id as product_id,
-        product.image as product_image,
+        product.main_image as product_image,
         product.description as product_description,
         product.*,
         category.category_name as category_name,
@@ -131,7 +131,7 @@ const getProductsByCategoryId = async (
     const result = await client.query(
       `SELECT
         product.id as product_id,
-        product.image as product_image,
+        product.main_image as product_image,
         product.description as product_description,
         product.*,
         category.category_name as category_name,
@@ -162,7 +162,7 @@ const createProduct = async (
     productName,
     categoryId,
     price,
-    image,
+    mainImage,
     description,
     discountPercentage,
     rating,
@@ -172,12 +172,12 @@ const createProduct = async (
   try {
     await client.connect();
     const result = await client.query(
-      `INSERT INTO product (product_name, category_id, price, image, description, discount_percentage, rating, sku) VALUES ($1, $2, $3, $4, $5,  $6, $7, $8) RETURNING *`,
+      `INSERT INTO product (product_name, category_id, price, main_image, description, discount_percentage, rating, sku) VALUES ($1, $2, $3, $4, $5,  $6, $7, $8) RETURNING *`,
       [
         productName,
         categoryId,
         price,
-        image,
+        mainImage,
         description,
         discountPercentage,
         rating,
@@ -220,7 +220,7 @@ const editProduct = async (
       productName: updatedProduct.productName ?? foundProduct.productName,
       categoryId: updatedProduct.categoryId ?? foundProduct.categoryId,
       price: updatedProduct.price ?? foundProduct.price,
-      image: updatedProduct.image ?? foundProduct.image,
+      mainImage: updatedProduct.mainImage ?? foundProduct.mainImage,
       description: updatedProduct.description ?? foundProduct.description,
       discountPercentage:
         updatedProduct.discountPercentage ?? foundProduct.discountPercentage,
@@ -228,12 +228,12 @@ const editProduct = async (
       sku: updatedProduct.sku ?? foundProduct.sku,
     };
     const result = await client.query(
-      `UPDATE "product" SET product_name = $1, category_id = $2, price = $3, image = $4, description = $5, discount_percentage = $6, rating = $7, sku = $8 WHERE id = $9 RETURNING *`,
+      `UPDATE "product" SET product_name = $1, category_id = $2, price = $3, main_image = $4, description = $5, discount_percentage = $6, rating = $7, sku = $8 WHERE id = $9 RETURNING *`,
       [
         updateData.productName,
         updateData.categoryId,
         updateData.price,
-        updateData.image,
+        updateData.mainImage,
         updateData.description,
         updateData.discountPercentage,
         updateData.rating,

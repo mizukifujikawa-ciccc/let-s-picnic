@@ -69,7 +69,7 @@ export function createProductController(productService: ProductService) {
         productName,
         categoryId,
         price,
-        image,
+        mainImage,
         description,
         discountPercentage,
         rating,
@@ -79,7 +79,7 @@ export function createProductController(productService: ProductService) {
         !productName ||
         !categoryId ||
         !price ||
-        !image ||
+        !mainImage ||
         !description ||
         !rating ||
         !sku
@@ -92,7 +92,7 @@ export function createProductController(productService: ProductService) {
           productName,
           categoryId,
           price,
-          image,
+          mainImage,
           description,
           discountPercentage,
           rating,
