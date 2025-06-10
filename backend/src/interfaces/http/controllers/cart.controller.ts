@@ -43,9 +43,8 @@ export function createCartController(cartService: CartService) {
         const cart = await cartService.getCartByUserId(userId);
         res.status(200).json({
           id: cart.id,
-          user: cart.user.toPlainObject(),
-          cartItems: cart.cartItems.map(i => i.toPlainObject()),
-          errors: cart.errors
+          user: cart.user?.toPlainObject(),
+          cartItems: cart.cartItems.map(i => i.toPlainObject())
         });
       } catch {
         res.status(500).json({ error: 'Failed to fetch cart' });
@@ -78,9 +77,8 @@ export function createCartController(cartService: CartService) {
         }
         res.status(200).json({
           id: updated.id,
-          user: updated.user.toPlainObject(),
-          cartItems: updated.cartItems.map(i => i.toPlainObject()),
-          errors: updated.errors
+          user: updated.user?.toPlainObject(),
+          cartItems: updated.cartItems.map(i => i.toPlainObject())
         });
       } catch (err) {
         console.error('editCartByUserId error:', err);
