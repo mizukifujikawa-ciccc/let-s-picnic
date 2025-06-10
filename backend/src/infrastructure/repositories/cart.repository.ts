@@ -13,8 +13,6 @@ const mapRowToCart = (row: any): Cart => {
 const mapRowToCartItem = (row: any): CartItem => {
   return new CartItem(
     row.id,
-    row.cart_id,
-    row.product_id,
     row.quantity,
     row.created_at,
     row.updated_at
@@ -133,8 +131,6 @@ const getCartByUserId = async (userId: number): Promise<CartDetail> => {
 
       return new CartItem(
         row.cartItemId,
-        cartId,
-        row.productId,
         row.quantity,
         row.created_at,
         row.updated_at,
