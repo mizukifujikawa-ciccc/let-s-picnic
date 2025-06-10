@@ -7,7 +7,13 @@ import { CartRepository } from '../../domain/repositories/cart.repository';
 import { User } from '../../domain/entities/user.entity';
 
 const mapRowToCart = (row: any): Cart => {
-  return new Cart(row.id, row.status, row.created_at, row.updated_at);
+  return new Cart(
+    row.id,
+    row.status,
+    row.created_at,
+    row.updated_at,
+    row.shipping_address
+  );
 };
 
 const mapRowToCartItem = (row: any): CartItem => {
@@ -88,7 +94,7 @@ const getCartByUserId = async (userId: number): Promise<Cart> => {
     );
 
     if (cartRes.rows.length === 0) {
-      return new Cart(null, null, null, null, user, []);
+      return new Cart(null, null, null, null, null, user, []);
     }
 
     const cart = mapRowToCart(cartRes.rows[0]);
@@ -179,6 +185,30 @@ const updateCartByUserId = async (
   }
 };
 
+const editAddressByUserId = async (
+  userId: number,
+  address: string
+): Promise<Cart | undefined> => {
+  const client = createClient();
+  try {
+    await client.connect();
+    const cartRes = await client.query(
+      "SELECT id FROM cart WHERE user_id = $1 AND status = 'active'",
+      [userId]
+    );
+    if (cartRes.rows.length === 0) return undefined;
+    const cartId = cartRes.rows[0].id;
+    await client.query(
+      "UPDATE cart SET shipping_address = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2",
+      [address, cartId]
+    );
+    const updated = await getCartByUserId(userId);
+    return updated;
+  } finally {
+    await client.end();
+  }
+};
+
 const deleteCartItemByUserId = async (userId: number, cartItemId: number): Promise<void> => {
   const cart = await getCartByUserId(userId);
   if (!cart.id) return;
@@ -208,6 +238,7 @@ export default {
   addCartItem,
   getCartByUserId,
   updateCartByUserId,
+  editAddressByUserId,
   deleteCartItemByUserId,
   deleteCartByUserId
 } as CartRepository;

@@ -17,6 +17,10 @@ export class CartService {
     return this.cartRepository.updateCartByUserId(userId, item);
   }
 
+  editAddressByUserId(userId: number, address: string): Promise<Cart | undefined> {
+    return this.cartRepository.editAddressByUserId(userId, address);
+  }
+
   deleteCartItemByUserId(userId: number, cartItemId: number): Promise<void> {
     return this.cartRepository.deleteCartItemByUserId(userId, cartItemId);
   }
