@@ -1,6 +1,6 @@
 import { Cart } from '../../domain/entities/cart.entity';
 import { CartItem } from '../../domain/entities/cartItem.entity';
-import { CartRepository, CartDetail } from '../../domain/repositories/cart.repository';
+import { CartRepository } from '../../domain/repositories/cart.repository';
 
 export class CartService {
   constructor(private readonly cartRepository: CartRepository) {}
@@ -9,11 +9,11 @@ export class CartService {
     return this.cartRepository.addCartItem(userId, productId, quantity);
   }
 
-  getCartByUserId(userId: number): Promise<CartDetail> {
+  getCartByUserId(userId: number): Promise<Cart> {
     return this.cartRepository.getCartByUserId(userId);
   }
 
-  updateCartByUserId(userId: number, item: { productId: number; quantity: number }): Promise<CartDetail | undefined> {
+  updateCartByUserId(userId: number, item: { productId: number; quantity: number }): Promise<Cart | undefined> {
     return this.cartRepository.updateCartByUserId(userId, item);
   }
 

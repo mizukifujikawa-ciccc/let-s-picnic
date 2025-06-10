@@ -3,37 +3,31 @@ import { Cart } from '../../domain/entities/cart.entity';
 import { CartItem } from '../../domain/entities/cartItem.entity';
 import { Product } from '../../domain/entities/product.entity';
 import { Category } from '../../domain/entities/category.entity';
-import { CartRepository, CartDetail } from '../../domain/repositories/cart.repository';
+import { CartRepository } from '../../domain/repositories/cart.repository';
+import { User } from '../../domain/entities/user.entity';
 
 const mapRowToCart = (row: any): Cart => {
-  return new Cart(row.id, row.user_id, row.status, row.created_at, row.updated_at);
+  return new Cart(row.id, row.status, row.created_at, row.updated_at);
 };
 
 const mapRowToCartItem = (row: any): CartItem => {
   return new CartItem(
     row.id,
-    row.cart_id,
-    row.product_id,
     row.quantity,
     row.created_at,
     row.updated_at
   );
 };
 
-const createCartByUserId = async (userId: number): Promise<Cart> => {
+const createCartByUserId = async (userId: number): Promise<void> => {
   const client = createClient();
   try {
     await client.connect();
     const findActiveCart = `SELECT * FROM cart WHERE user_id = $1 AND status = 'active' LIMIT 1`;
     const result = await client.query(findActiveCart, [userId]);
-    if (result.rows.length > 0) {
-      return mapRowToCart(result.rows[0]);
+    if (result.rows.length === 0) {
+      await client.query(`INSERT INTO cart (user_id, status) VALUES ($1, 'active')`, [userId]);
     }
-    const newCartRes = await client.query(
-      `INSERT INTO cart (user_id, status) VALUES ($1, 'active') RETURNING *`,
-      [userId]
-    );
-    return mapRowToCart(newCartRes.rows[0]);
   } finally {
     await client.end();
   }
@@ -43,10 +37,15 @@ const addCartItem = async (userId: number, productId: number, quantity: number):
   const client = createClient();
   try {
     await client.connect();
-    const cart = await createCartByUserId(userId);
+    await createCartByUserId(userId);
+    const cartRes = await client.query(
+      `SELECT id FROM cart WHERE user_id = $1 AND status = 'active' LIMIT 1`,
+      [userId]
+    );
+    const cartId = cartRes.rows[0].id;
     const existing = await client.query(
       'SELECT * FROM cart_item WHERE cart_id = $1 AND product_id = $2',
-      [cart.id, productId]
+      [cartId, productId]
     );
     if (existing.rows.length > 0) {
       const updated = await client.query(
@@ -57,7 +56,7 @@ const addCartItem = async (userId: number, productId: number, quantity: number):
     }
     const inserted = await client.query(
       `INSERT INTO cart_item (cart_id, product_id, quantity, created_at, updated_at) VALUES ($1, $2, $3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) RETURNING *`,
-      [cart.id, productId, quantity]
+      [cartId, productId, quantity]
     );
     return mapRowToCartItem(inserted.rows[0]);
   } finally {
@@ -65,35 +64,38 @@ const addCartItem = async (userId: number, productId: number, quantity: number):
   }
 };
 
-const getCartByUserId = async (userId: number): Promise<CartDetail> => {
+
+const getCartByUserId = async (userId: number): Promise<Cart> => {
   const client = createClient();
   try {
     await client.connect();
-    const userCartResult = await client.query(
-      `SELECT u.id AS "userId", u.firstname AS "firstName", u.lastname AS "lastName", u.role, c.id AS "cartId"
-       FROM "user" u
-       JOIN cart c ON u.id = c.user_id
-       WHERE u.id = $1 AND c.status = 'active'`,
+
+    const userRes = await client.query(
+      `SELECT id AS "userId", firstname AS "firstName", lastname AS "lastName", email, password, role, created_at AS "createdAt", updated_at AS "updatedAt" FROM "user" WHERE id = $1`,
       [userId]
     );
 
-    if (userCartResult.rows.length === 0) {
-      const userOnly = await client.query(
-        `SELECT id AS "userId", firstname AS "firstName", lastname AS "lastName", role FROM "user" WHERE id = $1`,
-        [userId]
-      );
-      return {
-        user: {
-          ...userOnly.rows[0],
-          cartId: null,
-          cartItems: []
-        }
-      };
+    if (userRes.rows.length === 0) {
+      throw new Error('User not found');
     }
 
-    const userCart = userCartResult.rows[0];
+    const u = userRes.rows[0];
+    const user = new User(u.userId, u.firstName, u.lastName, u.email, u.password, u.role, u.createdAt, u.updatedAt);
+
+    const cartRes = await client.query(
+      `SELECT * FROM cart WHERE user_id = $1 AND status = 'active' LIMIT 1`,
+      [userId]
+    );
+
+    if (cartRes.rows.length === 0) {
+      return new Cart(null, null, null, null, user, []);
+    }
+
+    const cart = mapRowToCart(cartRes.rows[0]);
+    cart.setUser(user);
+    const cartId = cart.id as number;
     const cartItemsRes = await client.query(
-      `SELECT ci.id AS "cartItemId", ci.quantity, ci.product_id, ci.created_at, ci.updated_at,
+      `SELECT ci.id AS "cartItemId", ci.quantity, ci.created_at, ci.updated_at,
               p.id AS "productId", p.product_name, p.price, p.image, p.description,
               p.discount_percentage, p.rating, p.sku,
               cat.id AS "categoryId", cat.category_name, cat.description AS category_description,
@@ -102,7 +104,7 @@ const getCartByUserId = async (userId: number): Promise<CartDetail> => {
          JOIN product p ON ci.product_id = p.id
          JOIN category cat ON p.category_id = cat.id
          WHERE ci.cart_id = $1`,
-      [userCart.cartId]
+      [cartId]
     );
 
     const cartItems = cartItemsRes.rows.map(row => {
@@ -114,6 +116,7 @@ const getCartByUserId = async (userId: number): Promise<CartDetail> => {
         row.category_created_at,
         row.category_updated_at
       );
+
       const product = new Product(
         row.productId,
         row.product_name,
@@ -127,39 +130,26 @@ const getCartByUserId = async (userId: number): Promise<CartDetail> => {
         row.created_at,
         row.updated_at
       );
-      const item = new CartItem(
+
+      return new CartItem(
         row.cartItemId,
-        userCart.cartId,
-        row.productId,
         row.quantity,
         row.created_at,
         row.updated_at,
         product
       );
-      return item;
     });
-
-    return {
-      user: {
-        userId: userCart.userId,
-        firstName: userCart.firstName,
-        lastName: userCart.lastName,
-        role: userCart.role,
-        cartId: userCart.cartId,
-        cartItems
-      }
-    };
+    cart.setCartItems(cartItems);
+    return cart;
   } finally {
     await client.end();
   }
 };
-
 const updateCartByUserId = async (
   userId: number,
   item: { productId: number; quantity: number }
-): Promise<CartDetail | undefined> => {
+): Promise<Cart | undefined> => {
   const client = createClient();
-  const errors: string[] = [];
 
   try {
     await client.connect();
@@ -169,9 +159,7 @@ const updateCartByUserId = async (
 
     const { productId, quantity } = item;
     const productCheck = await client.query('SELECT id FROM product WHERE id = $1', [productId]);
-    if (productCheck.rows.length === 0) {
-      errors.push(`Product ID ${productId} not found`);
-    } else {
+    if (productCheck.rows.length !== 0) {
       const cartItemRes = await client.query('SELECT id FROM cart_item WHERE cart_id = $1 AND product_id = $2', [cartId, productId]);
       if (quantity === 0) {
         if (cartItemRes.rows.length > 0) {
@@ -185,7 +173,7 @@ const updateCartByUserId = async (
     }
 
     const updated = await getCartByUserId(userId);
-    return { ...updated, errors: errors.length ? errors : undefined };
+    return updated;
   } finally {
     await client.end();
   }
@@ -193,7 +181,7 @@ const updateCartByUserId = async (
 
 const deleteCartItemByUserId = async (userId: number, cartItemId: number): Promise<void> => {
   const cart = await getCartByUserId(userId);
-  if (!cart.user.cartId) return;
+  if (!cart.id) return;
   const client = createClient();
   try {
     await client.connect();
@@ -205,7 +193,7 @@ const deleteCartItemByUserId = async (userId: number, cartItemId: number): Promi
 
 const deleteCartByUserId = async (userId: number): Promise<void> => {
   const cart = await getCartByUserId(userId);
-  if (!cart.user.cartId) return;
+  if (!cart.id) return;
   const client = createClient();
   try {
     await client.connect();
