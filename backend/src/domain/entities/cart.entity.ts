@@ -18,7 +18,7 @@ export class Cart {
   get user(): User | undefined { return this._user; }
   get cartItems(): CartItem[] { return this._cartItems; }
 
-  attachUser(user: User) {
+  setUser(user: User) {
     this._user = user;
   }
 

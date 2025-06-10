@@ -92,7 +92,7 @@ const getCartByUserId = async (userId: number): Promise<Cart> => {
     }
 
     const cart = mapRowToCart(cartRes.rows[0]);
-    cart.attachUser(user);
+    cart.setUser(user);
     const cartId = cart.id as number;
     const cartItemsRes = await client.query(
       `SELECT ci.id AS "cartItemId", ci.quantity, ci.created_at, ci.updated_at,
