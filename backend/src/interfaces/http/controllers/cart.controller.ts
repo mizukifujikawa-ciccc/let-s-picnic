@@ -3,20 +3,6 @@ import { CartService } from '../../../application/service/cart.service';
 
 export function createCartController(cartService: CartService) {
   return {
-    // createCartByUser: async (req: Request, res: Response) => {
-    //   try {
-    //     const userId = parseInt(req.body.userId);
-    //     if (isNaN(userId)) {
-    //       res.status(400).json({ error: 'Invalid user ID. Must be a number.' });
-    //       return;
-    //     }
-    //     const cart = await cartService.createCartByUserId(userId);
-    //     res.status(201).json(cart.toPlainObject());
-    //   } catch {
-    //     res.status(500).json({ error: 'Failed to creat cart' });
-    //   }
-    // },
-
     addCartItemByUserId: async (req: Request, res: Response) => {
       try {
         const userId = parseInt(req.params.userId);
@@ -41,11 +27,7 @@ export function createCartController(cartService: CartService) {
       }
       try {
         const cart = await cartService.getCartByUserId(userId);
-        res.status(200).json({
-          id: cart.id,
-          user: cart.user?.toPlainObject(),
-          cartItems: cart.cartItems.map(i => i.toPlainObject())
-        });
+        res.status(200).json(cart.toPlainObject());
       } catch {
         res.status(500).json({ error: 'Failed to fetch cart' });
       }
@@ -75,11 +57,7 @@ export function createCartController(cartService: CartService) {
           res.status(404).json({ error: 'Cart not found.' });
           return;
         }
-        res.status(200).json({
-          id: updated.id,
-          user: updated.user?.toPlainObject(),
-          cartItems: updated.cartItems.map(i => i.toPlainObject())
-        });
+        res.status(200).json(updated.toPlainObject());
       } catch (err) {
         console.error('editCartByUserId error:', err);
         res.status(500).json({ error: 'Failed to edit cart.' });

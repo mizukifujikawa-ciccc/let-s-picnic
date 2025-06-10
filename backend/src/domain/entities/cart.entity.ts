@@ -35,10 +35,15 @@ export class Cart {
     this._updatedAt = new Date().toISOString();
   }
 
+  getTotalAmount():number {
+    return this._cartItems.reduce((sum, item) => sum + item.getSubTotal(), 0);
+  }
+
   toPlainObject() {
     return {
       id: this._id,
       status: this._status,
+      totalDiscountedAmount: this.getTotalAmount(),
       createdAt: this._createdAt,
       updatedAt: this._updatedAt,
       user: this._user ? this._user.toPlainObject() : undefined,

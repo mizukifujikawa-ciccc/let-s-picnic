@@ -107,14 +107,6 @@ export class Product {
     this._updatedAt = new Date().toISOString();
   }
 
-  getDiscountedPrice(): number {
-    if (this.discountPercentage == null || this.discountPercentage == 0) {
-      return this.price;
-    } else {
-      return this.price * ((100 - this.discountPercentage) / 100);
-    }
-  }
-
   toPlainObject() {
     return {
       id: this._id,
@@ -124,7 +116,6 @@ export class Product {
       image: this._image,
       description: this._description,
       discountPercentage: this._discountPercentage,
-      discountedPrice: this.getDiscountedPrice(),
       rating: this._rating,
       sku: this._sku,
       createdAt: this._createdAt,

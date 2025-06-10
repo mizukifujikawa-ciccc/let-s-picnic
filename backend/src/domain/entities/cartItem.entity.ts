@@ -28,10 +28,25 @@ export class CartItem {
     this._updatedAt = new Date().toISOString();
   }
 
+  getDiscountedPrice(): number {
+    if (!this._product) return 0;
+    if (this._product.discountPercentage == null || this._product.discountPercentage == 0) {
+      return this._product?.price;
+    } else {
+      return this._product?.price * ((100 - this._product?.discountPercentage) / 100);
+    }
+  }
+
+  getSubTotal(): number {
+    return this._quantity * this.getDiscountedPrice();
+  }
+
   toPlainObject() {
     return {
       id: this._id,
       quantity: this._quantity,
+      discountedPrice: this.getDiscountedPrice(),
+      subTotal: this.getSubTotal(),
       createdAt: this._createdAt,
       updatedAt: this._updatedAt,
       product: this._product ? this._product.toPlainObject() : undefined
