@@ -69,26 +69,6 @@ describe('GET /product', () => {
     }
   ]
 
-  const expectProduct = (product: any, expected: any) => {
-    expect(product.id).toBe(expected.id);
-    expect(product.productName).toBe(expected.productName);
-    expect(product.price).toBe(expected.price);
-    expect(product.mainImage).toBe(expected.mainImage);
-    expect(product.description).toBe(expected.description);
-    expect(product.category.id).toBe(expected.category.id);
-    expect(product.category.categoryName).toBe(expected.category.categoryName);
-    expect(product.category.description).toBe(expected.category.description);
-    expect(product.category.image).toBe(expected.category.image);
-    expect(product.discountPercentage).toBe(expected.discountPercentage);
-    expect(product.rating).toBe(expected.rating);
-    expect(product.sku).toBe(expected.sku);
-
-    expect(product.category.createdAt).not.toBeNull();
-    expect(product.category.updatedAt).not.toBeNull();
-    expect(product.createdAt).not.toBeNull();
-    expect(product.updatedAt).not.toBeNull();
-  }
-
   // テスト用データを挿入
   beforeAll(async () => {
     await client.connect();  // データベースに接続
@@ -113,7 +93,7 @@ describe('GET /product', () => {
   // test
   it('should return all products', async () => {
     const response = await request(app).get('/product');
-    
+
     // ステータスコードが200であることを確認
     expect(response.status).toBe(200);
 
@@ -168,5 +148,25 @@ describe('GET /product', () => {
     await client.query('DELETE FROM "category"');
     await client.end();  // データベース接続を終了
   });
+
+  const expectProduct = (product: any, expected: any) => {
+    expect(product.id).toBe(expected.id);
+    expect(product.productName).toBe(expected.productName);
+    expect(product.price).toBe(expected.price);
+    expect(product.mainImage).toBe(expected.mainImage);
+    expect(product.description).toBe(expected.description);
+    expect(product.category.id).toBe(expected.category.id);
+    expect(product.category.categoryName).toBe(expected.category.categoryName);
+    expect(product.category.description).toBe(expected.category.description);
+    expect(product.category.image).toBe(expected.category.image);
+    expect(product.discountPercentage).toBe(expected.discountPercentage);
+    expect(product.rating).toBe(expected.rating);
+    expect(product.sku).toBe(expected.sku);
+
+    expect(product.category.createdAt).not.toBeNull();
+    expect(product.category.updatedAt).not.toBeNull();
+    expect(product.createdAt).not.toBeNull();
+    expect(product.updatedAt).not.toBeNull();
+  }
 });
 
