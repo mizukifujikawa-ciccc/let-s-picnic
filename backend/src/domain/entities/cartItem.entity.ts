@@ -33,7 +33,8 @@ export class CartItem {
     if (this._product.discountPercentage == null || this._product.discountPercentage == 0) {
       return this._product?.price;
     } else {
-      return this._product?.price * ((100 - this._product?.discountPercentage) / 100);
+      const discountPrice =  this._product?.price * ((100 - this._product?.discountPercentage) / 100);
+      return Math.round(discountPrice * 100) / 100;
     }
   }
 

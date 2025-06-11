@@ -37,7 +37,7 @@ const getActiveCartById = async (cartId: number): Promise<Cart | null> => {
     const row = cartRes.rows[0];
     const cart = mapRowToCart(row);
     const user = new User(row.userId, row.firstName, row.lastName, row.email, row.password, row.role, row.userCreatedAt, row.userUpdatedAt);
-    cart.setUser(user);
+    cart.attachUser(user);
     const itemsRes = await client.query(
       `SELECT ci.id AS "cartItemId", ci.quantity, ci.created_at, ci.updated_at,
               p.id AS "productId", p.product_name, p.price, p.main_image, p.description,
@@ -125,7 +125,7 @@ const getCartByPaymentIntentId = async (paymentIntentId: string): Promise<Cart |
     const row = cartRes.rows[0];
     const cart = mapRowToCart(row);
     const user = new User(row.userId, row.firstName, row.lastName, row.email, row.password, row.role, row.userCreatedAt, row.userUpdatedAt);
-    cart.setUser(user);
+    cart.attachUser(user);
     return cart;
   } finally {
     await client.end();
@@ -161,7 +161,7 @@ const getOrderedInfo = async (paymentIntentId: string): Promise<{ trackingNum: s
     const row = res.rows[0];
     const cart = mapRowToCart(row);
     const user = new User(row.userId, row.firstName, row.lastName, row.email, row.password, row.role, row.userCreatedAt, row.userUpdatedAt);
-    cart.setUser(user);
+    cart.attachUser(user);
     const itemsRes = await client.query(
       `SELECT ci.id AS "cartItemId", ci.quantity, ci.created_at, ci.updated_at,
               p.id AS "productId", p.product_name, p.price, p.main_image, p.description,
