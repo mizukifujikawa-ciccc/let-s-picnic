@@ -9,6 +9,7 @@ const paymentService = new PaymentService(paymentRepository);
 const paymentController = createPaymentController(paymentService);
 
 paymentRouter.post('/create-payment-intent', paymentController.createPaymentIntent);
+paymentRouter.get('/:paymentIntentId', paymentController.getOrderedInfo);
 
 export { paymentService, paymentController };
 export default paymentRouter;

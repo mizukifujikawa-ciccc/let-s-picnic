@@ -14,5 +14,6 @@ export interface PaymentRepository {
   updateCartPaymentIntent(cartId: number, paymentIntentId: string): Promise<void>;
   updateCartStatus(cartId: number, status: 'pending' | 'purchased'): Promise<void>;
   getCartByPaymentIntentId(paymentIntentId: string): Promise<Cart | null>;
+  getOrderedInfo(paymentIntentId: string): Promise<{ trackingNum: string; cart: Cart } | null>;
   createTransaction(data: CreateTransactionInput): Promise<void>;
 }

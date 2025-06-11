@@ -37,7 +37,7 @@ const getActiveCartById = async (cartId: number): Promise<Cart | null> => {
     const row = cartRes.rows[0];
     const cart = mapRowToCart(row);
     const user = new User(row.userId, row.firstName, row.lastName, row.email, row.password, row.role, row.userCreatedAt, row.userUpdatedAt);
-    cart.setUser(user);
+    cart.attachUser(user);
     const itemsRes = await client.query(
       `SELECT ci.id AS "cartItemId", ci.quantity, ci.created_at, ci.updated_at,
               p.id AS "productId", p.product_name, p.price, p.main_image, p.description,
@@ -125,7 +125,7 @@ const getCartByPaymentIntentId = async (paymentIntentId: string): Promise<Cart |
     const row = cartRes.rows[0];
     const cart = mapRowToCart(row);
     const user = new User(row.userId, row.firstName, row.lastName, row.email, row.password, row.role, row.userCreatedAt, row.userUpdatedAt);
-    cart.setUser(user);
+    cart.attachUser(user);
     return cart;
   } finally {
     await client.end();
@@ -145,10 +145,77 @@ const createTransaction = async (data: CreateTransactionInput): Promise<void> =>
   }
 };
 
+const getOrderedInfo = async (paymentIntentId: string): Promise<{ trackingNum: string; cart: Cart } | null> => {
+  const client = createClient();
+  try {
+    await client.connect();
+    const res = await client.query(
+      `SELECT t.tracking_num, c.*, u.id as "userId", u.firstname as "firstName", u.lastname as "lastName", u.email, u.password, u.role, u.created_at as "userCreatedAt", u.updated_at as "userUpdatedAt"
+         FROM transaction t
+         JOIN cart c ON t.cart_id = c.id
+         JOIN "user" u ON c.user_id = u.id
+        WHERE t.payment_intent_id = $1 LIMIT 1`,
+      [paymentIntentId]
+    );
+    if (res.rows.length === 0) return null;
+    const row = res.rows[0];
+    const cart = mapRowToCart(row);
+    const user = new User(row.userId, row.firstName, row.lastName, row.email, row.password, row.role, row.userCreatedAt, row.userUpdatedAt);
+    cart.attachUser(user);
+    const itemsRes = await client.query(
+      `SELECT ci.id AS "cartItemId", ci.quantity, ci.created_at, ci.updated_at,
+              p.id AS "productId", p.product_name, p.price, p.main_image, p.description,
+              p.discount_percentage, p.rating, p.sku,
+              cat.id AS "categoryId", cat.category_name, cat.description AS category_description,
+              cat.image AS category_image, cat.created_at AS category_created_at, cat.updated_at AS category_updated_at
+         FROM cart_item ci
+         JOIN product p ON ci.product_id = p.id
+         JOIN category cat ON p.category_id = cat.id
+         WHERE ci.cart_id = $1`,
+      [cart.id]
+    );
+    const cartItems = itemsRes.rows.map((r: any) => {
+      const category = new Category(
+        r.categoryId,
+        r.category_name,
+        r.category_description,
+        r.category_image,
+        r.category_created_at,
+        r.category_updated_at
+      );
+      const product = new Product(
+        r.productId,
+        r.product_name,
+        category,
+        r.price,
+        r.main_image,
+        r.description,
+        r.discount_percentage,
+        r.rating,
+        r.sku,
+        r.created_at,
+        r.updated_at
+      );
+      return new CartItem(
+        r.cartItemId,
+        r.quantity,
+        r.created_at,
+        r.updated_at,
+        product
+      );
+    });
+    cart.setCartItems(cartItems);
+    return { trackingNum: row.tracking_num, cart };
+  } finally {
+    await client.end();
+  }
+};
+
 export default {
   getActiveCartById,
   updateCartPaymentIntent,
   updateCartStatus,
   getCartByPaymentIntentId,
+  getOrderedInfo,
   createTransaction,
 } as PaymentRepository;

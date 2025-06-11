@@ -32,5 +32,23 @@ export function createPaymentController(paymentService: PaymentService) {
         res.status(400).send('Webhook Error');
       }
     },
+
+    getOrderedInfo: async (req: Request, res: Response) => {
+      const paymentIntentId = req.params.paymentIntentId;
+      try {
+        const result = await paymentService.getOrderedInfo(paymentIntentId);
+        if (!result) {
+          res.status(404).json({ error: 'Order not found' });
+          return;
+        }
+        res.status(200).json({
+          trackingNum: result.trackingNum,
+          cart: result.cart.toPlainObject(),
+        });
+      } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to fetch order info' });
+      }
+    },
   };
 }
