@@ -45,4 +45,8 @@ export class PaymentService {
       paymentIntentId
     });
   }
+
+  async getOrderedInfo(paymentIntentId: string) {
+    return this.repository.getOrderedInfo(paymentIntentId);
+  }
 }
