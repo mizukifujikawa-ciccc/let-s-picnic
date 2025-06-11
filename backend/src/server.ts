@@ -23,7 +23,7 @@ app.use(cors({
   origin: "http://localhost:5173", // React port
   credentials: true // allow cookie transfer
 }))
-app.post('/payment/webhook', express.raw({ type: 'application/json' }), paymentController.webhook)
+app.post('/webhook', express.raw({ type: 'application/json' }), paymentController.webhook)
 app.use(express.json());
 const SIGN_KEY = process.env.COOKIE_SIGN_KEY
 const ENCRYPT_KEY = process.env.COOKIE_ENCRYPT_KEY

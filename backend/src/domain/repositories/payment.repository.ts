@@ -6,6 +6,7 @@ export interface CreateTransactionInput {
   trackingNum: string;
   status: 'purchased' | 'cancel';
   amount: number;
+  paymentIntentId: string;
 }
 
 export interface PaymentRepository {

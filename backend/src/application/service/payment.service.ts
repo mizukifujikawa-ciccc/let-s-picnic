@@ -6,7 +6,7 @@ export class PaymentService {
   private stripe: Stripe;
   constructor(private readonly repository: PaymentRepository) {
     const key = process.env.STRIPE_SECRET_KEY as string;
-    this.stripe = new Stripe(key, { apiVersion: '2022-11-15' });
+    this.stripe = new Stripe(key);
   }
 
   async createPaymentIntent(cartId: number): Promise<string | null> {
@@ -42,6 +42,7 @@ export class PaymentService {
       trackingNum,
       status: 'purchased',
       amount,
+      paymentIntentId
     });
   }
 }

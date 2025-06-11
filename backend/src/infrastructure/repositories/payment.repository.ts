@@ -137,8 +137,8 @@ const createTransaction = async (data: CreateTransactionInput): Promise<void> =>
   try {
     await client.connect();
     await client.query(
-      `INSERT INTO transaction (user_id, cart_id, tracking_num, status, amount, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
-      [data.userId, data.cartId, data.trackingNum, data.status, data.amount]
+      `INSERT INTO transaction (user_id, cart_id, tracking_num, status, amount, payment_intent_id, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
+      [data.userId, data.cartId, data.trackingNum, data.status, data.amount, data.paymentIntentId]
     );
   } finally {
     await client.end();
