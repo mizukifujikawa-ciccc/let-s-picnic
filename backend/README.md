@@ -345,7 +345,7 @@ Add an item to a user's cart.
   "subTotal": 19.98,
   "createdAt": "2024-01-01T00:00:00.000Z",
   "updatedAt": "2024-01-01T00:00:00.000Z",
-  "product": { "id": 1, "productName": "CK One" }
+  "product": { "id": 1, "productName": "CK One", ... }
 }
 ```
 
@@ -361,7 +361,7 @@ Retrieve the active cart for a user.
   "createdAt": "2024-01-01T00:00:00.000Z",
   "updatedAt": "2024-01-01T00:00:00.000Z",
   "shippingAddress": null,
-  "user": { "id": 1, "firstName": "John" },
+  "user": { "id": 1, "firstName": "John", ... },
   "cartItems": [
     {
       "id": 1,
@@ -370,7 +370,7 @@ Retrieve the active cart for a user.
       "subTotal": 19.98,
       "createdAt": "2024-01-01T00:00:00.000Z",
       "updatedAt": "2024-01-01T00:00:00.000Z",
-      "product": { "id": 1, "productName": "CK One" }
+      "product": { "id": 1, "productName": "CK One", ... }
     }
   ]
 }
@@ -440,7 +440,7 @@ Get order information after payment.
     "createdAt": "2024-01-01T00:00:00.000Z",
     "updatedAt": "2024-01-01T00:00:00.000Z",
     "shippingAddress": "Toronto",
-    "user": { "id": 1, "firstName": "John" },
+    "user": { "id": 1, "firstName": "John", ... },
     "cartItems": [ ... ]
   }
 }
